@@ -1,0 +1,67 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import random
+import time
+app = FastAPI(title="Sports Shield API", description="AI-driven sports media piracy detection backend")
+# Allow the React frontend to communicate with this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+class ScanRequest(BaseModel):
+    url: str
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to Sports Shield API"}
+@app.post("/scan")
+def scan_content(request: ScanRequest):
+    # Simulate an AI scan that takes some time
+    time.sleep(1.5)
+    
+    # Mocking detection of piracy
+    is_pirated = random.choice([True, False])
+    risk_score = random.randint(10, 99) if is_pirated else random.randint(1, 20)
+    
+    return {
+        "status": "success",
+        "scanned_url": request.url,
+        "is_pirated": is_pirated,
+        "risk_score": risk_score,
+        "details": {
+            "watermark_detected": is_pirated,
+            "dna_match_confidence": f"{random.randint(60, 99)}%" if is_pirated else "0%",
+            "modified_content_detected": is_pirated
+        }
+    }
+@app.get("/apps")
+def get_apps():
+    return [
+        {"id": 1, "name": "LiveSportsFree HD", "platform": "Android", "risk_level": "High", "status": "Action Required"},
+        {"id": 2, "name": "SoccerStreams Pro", "platform": "iOS", "risk_level": "Critical", "status": "Takedown Initiated"},
+        {"id": 3, "name": "SportsHub Plus", "platform": "Web", "risk_level": "Low", "status": "Monitoring"},
+        {"id": 4, "name": "GameDay Streams", "platform": "Smart TV", "risk_level": "Medium", "status": "Under Investigation"},
+    ]
+@app.get("/violations")
+def get_violations():
+    return [
+        {"id": "V-1001", "type": "Unauthorized Stream", "source": "Telegram", "views": 45000, "status": "Detected"},
+        {"id": "V-1002", "type": "Modified Clip (Cropped)", "source": "TikTok", "views": 120000, "status": "Takedown Sent"},
+        {"id": "V-1003", "type": "App Store Distribution", "source": "Google Play", "views": "N/A", "status": "Takedown Initiated"},
+        {"id": "V-1004", "type": "Website Streaming", "source": "freematch.tv", "views": 320000, "status": "Critical"},
+    ]
+@app.get("/dashboard_stats")
+def get_dashboard_stats():
+    return {
+        "total_scans": 12450,
+        "violations_detected": 342,
+        "takedowns_successful": 128,
+        "revenue_saved": "$4.2M",
+        "live_risk_level": "High"
+    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
