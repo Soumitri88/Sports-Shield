@@ -3,20 +3,29 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Sports Shield piracy intelligence API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: predictions
+    description: Predictive piracy modelling
+  - name: tracking
+    description: Active piracy spread tracking
+  - name: enforcement
+    description: AI enforcement actions
+  - name: assets
+    description: Protected content assets (DNA + watermarking)
+  - name: dashboard
+    description: Aggregate dashboard intelligence
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +33,130 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /predictions:
+    get:
+      operationId: getPredictions
+      tags: [predictions]
+      summary: List high-risk upcoming events
+      responses:
+        "200":
+          description: Predicted high-risk piracy events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredictionsResponse"
+
+  /tracking:
+    get:
+      operationId: getTracking
+      tags: [tracking]
+      summary: Live piracy spread incidents
+      responses:
+        "200":
+          description: Active tracked piracy incidents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackingResponse"
+
+  /enforcement:
+    post:
+      operationId: triggerEnforcement
+      tags: [enforcement]
+      summary: Trigger an AI enforcement action on an incident
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnforcementRequest"
+      responses:
+        "200":
+          description: Enforcement initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnforcementResponse"
+
+  /enforcement/actions:
+    get:
+      operationId: getEnforcementActions
+      tags: [enforcement]
+      summary: Recent enforcement actions feed
+      responses:
+        "200":
+          description: Recent enforcement actions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnforcementActionsResponse"
+
+  /assets:
+    get:
+      operationId: getAssets
+      tags: [assets]
+      summary: List protected content assets with DNA/watermarking metadata
+      responses:
+        "200":
+          description: Protected assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetsResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Operations summary stats for the dashboard
+      responses:
+        "200":
+          description: Aggregated KPIs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/regions:
+    get:
+      operationId: getRegionBreakdown
+      tags: [dashboard]
+      summary: Piracy viewer breakdown by region
+      responses:
+        "200":
+          description: Region distribution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionBreakdownResponse"
+
+  /dashboard/sources:
+    get:
+      operationId: getSourceBreakdown
+      tags: [dashboard]
+      summary: Piracy distribution by source platform
+      responses:
+        "200":
+          description: Source distribution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SourceBreakdownResponse"
+
+  /dashboard/timeseries:
+    get:
+      operationId: getTrafficTimeseries
+      tags: [dashboard]
+      summary: Hourly piracy viewer traffic over the last 24 hours
+      responses:
+        "200":
+          description: Hourly timeseries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeseriesResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +164,233 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    RiskLevel:
+      type: string
+      enum: [Low, Medium, High, Critical]
+
+    PredictionEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        match:
+          type: string
+        league:
+          type: string
+        riskLevel:
+          $ref: "#/components/schemas/RiskLevel"
+        timeToEvent:
+          type: string
+        estimatedPiracy:
+          type: string
+        estimatedViewers:
+          type: integer
+        confidence:
+          type: number
+      required: [id, match, league, riskLevel, timeToEvent, estimatedPiracy, estimatedViewers, confidence]
+
+    PredictionsResponse:
+      type: object
+      properties:
+        highRiskEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/PredictionEvent"
+      required: [highRiskEvents]
+
+    IncidentStatus:
+      type: string
+      enum: [Tracking, "Enforcement Pending", "Takedown Issued", Resolved]
+
+    TrackingIncident:
+      type: object
+      properties:
+        id:
+          type: integer
+        source:
+          type: string
+        type:
+          type: string
+        viewers:
+          type: integer
+        region:
+          type: string
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        match:
+          type: string
+        detectedAt:
+          type: string
+        url:
+          type: string
+      required: [id, source, type, viewers, region, status, match, detectedAt, url]
+
+    TrackingResponse:
+      type: object
+      properties:
+        activeIncidents:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrackingIncident"
+      required: [activeIncidents]
+
+    EnforcementRequest:
+      type: object
+      properties:
+        incidentId:
+          type: integer
+        action:
+          type: string
+      required: [incidentId, action]
+
+    EnforcementResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        agentStatus:
+          type: string
+      required: [success, message, agentStatus]
+
+    EnforcementAction:
+      type: object
+      properties:
+        id:
+          type: integer
+        incidentId:
+          type: integer
+        action:
+          type: string
+        target:
+          type: string
+        status:
+          type: string
+        timestamp:
+          type: string
+      required: [id, incidentId, action, target, status, timestamp]
+
+    EnforcementActionsResponse:
+      type: object
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnforcementAction"
+      required: [actions]
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        league:
+          type: string
+        dnaGenerated:
+          type: boolean
+        watermarkEmbedded:
+          type: boolean
+        integrity:
+          type: string
+        protectedSince:
+          type: string
+        leakAttempts:
+          type: integer
+      required: [id, name, league, dnaGenerated, watermarkEmbedded, integrity, protectedSince, leakAttempts]
+
+    AssetsResponse:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+      required: [assets]
+
+    DashboardSummary:
+      type: object
+      properties:
+        activeIncidents:
+          type: integer
+        viewersBlocked:
+          type: integer
+        takedownsToday:
+          type: integer
+        protectedAssets:
+          type: integer
+        revenueRecovered:
+          type: string
+        avgResponseSeconds:
+          type: integer
+      required:
+        - activeIncidents
+        - viewersBlocked
+        - takedownsToday
+        - protectedAssets
+        - revenueRecovered
+        - avgResponseSeconds
+
+    RegionStat:
+      type: object
+      properties:
+        region:
+          type: string
+        viewers:
+          type: integer
+        incidents:
+          type: integer
+      required: [region, viewers, incidents]
+
+    RegionBreakdownResponse:
+      type: object
+      properties:
+        regions:
+          type: array
+          items:
+            $ref: "#/components/schemas/RegionStat"
+      required: [regions]
+
+    SourceStat:
+      type: object
+      properties:
+        source:
+          type: string
+        viewers:
+          type: integer
+        incidents:
+          type: integer
+      required: [source, viewers, incidents]
+
+    SourceBreakdownResponse:
+      type: object
+      properties:
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceStat"
+      required: [sources]
+
+    TimeseriesPoint:
+      type: object
+      properties:
+        hour:
+          type: string
+        viewers:
+          type: integer
+        blocked:
+          type: integer
+      required: [hour, viewers, blocked]
+
+    TimeseriesResponse:
+      type: object
+      properties:
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeseriesPoint"
+      required: [points]

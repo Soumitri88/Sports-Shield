@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "BKnJE-6p_EupFdgfp7qZ5"
+uri = "file://artifacts/sports-shield/src/assets/champions-league.png"
+type = "image"
+title = "Champions League Broadcast graphic"
+
+[[generated]]
+id = "4P0wy_E38PPYLpwMAfQN6"
+uri = "file://artifacts/sports-shield/src/assets/nba-finals.png"
+type = "image"
+title = "NBA Finals Broadcast graphic"
+
+[[generated]]
+id = "xmLuDjVfQJKyzP37phDzf"
+uri = "file://artifacts/sports-shield/src/assets/f1-grand-prix.png"
+type = "image"
+title = "F1 Grand Prix Broadcast graphic"
+
+[[generated]]
+id = "lJ1dPVR7L_mxc1kMQq694"
+uri = "file://artifacts/sports-shield/src/assets/nfl-super-bowl.png"
+type = "image"
+title = "NFL Super Bowl Broadcast graphic"
+
+[[generated]]
+id = "Bns4BUdTPg3KqfMSSDpKv"
+uri = "file://artifacts/sports-shield/src/assets/wimbledon.png"
+type = "image"
+title = "Wimbledon Broadcast graphic"
