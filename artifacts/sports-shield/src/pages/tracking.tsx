@@ -27,7 +27,7 @@ export default function Tracking() {
         queryClient.invalidateQueries({ queryKey: getGetEnforcementActionsQueryKey() });
         toast.success("Enforcement action triggered successfully", {
           description: `Action applied to incident #${selectedIncident}`,
-          icon: <Shield className="h-4 w-4 text-emerald-500" />
+          icon: <Shield className="h-4 w-4 text-sky-400" />
         });
         setIsDialogOpen(false);
         setSelectedIncident(null);
@@ -55,7 +55,7 @@ export default function Tracking() {
       case 'Tracking': return <Badge variant="secondary" className="bg-blue-500/20 text-blue-500"><Activity className="w-3 h-3 mr-1"/> Tracking</Badge>;
       case 'Enforcement Pending': return <Badge variant="outline" className="text-amber-500 border-amber-500/50"><AlertTriangle className="w-3 h-3 mr-1"/> Pending</Badge>;
       case 'Takedown Issued': return <Badge variant="default" className="bg-primary/80"><Gavel className="w-3 h-3 mr-1"/> Issued</Badge>;
-      case 'Resolved': return <Badge variant="outline" className="text-emerald-500 border-emerald-500/50"><CheckCircle2 className="w-3 h-3 mr-1"/> Resolved</Badge>;
+      case 'Resolved': return <Badge variant="outline" className="text-sky-400 border-sky-400/50"><CheckCircle2 className="w-3 h-3 mr-1"/> Resolved</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };

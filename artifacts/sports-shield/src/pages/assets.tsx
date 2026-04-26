@@ -67,7 +67,7 @@ export default function Assets() {
                 <CardContent className="p-5 space-y-5">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                      <ShieldCheck className="h-4 w-4 text-sky-400" />
                       <span>Protected since</span>
                     </div>
                     <span className="font-medium font-mono">{asset.protectedSince}</span>
@@ -80,7 +80,7 @@ export default function Assets() {
                         <span className={asset.dnaGenerated ? 'text-foreground' : 'text-muted-foreground'}>Digital DNA</span>
                       </div>
                       {asset.dnaGenerated ? (
-                        <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10">Active</Badge>
+                        <Badge variant="outline" className="text-sky-400 border-sky-400/30 bg-sky-400/10">Active</Badge>
                       ) : (
                         <Badge variant="outline" className="text-muted-foreground">Pending</Badge>
                       )}
@@ -91,7 +91,7 @@ export default function Assets() {
                         <span className={asset.watermarkEmbedded ? 'text-foreground' : 'text-muted-foreground'}>Dyn. Watermark</span>
                       </div>
                       {asset.watermarkEmbedded ? (
-                        <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10">Active</Badge>
+                        <Badge variant="outline" className="text-sky-400 border-sky-400/30 bg-sky-400/10">Active</Badge>
                       ) : (
                         <Badge variant="outline" className="text-muted-foreground">Pending</Badge>
                       )}
@@ -101,11 +101,11 @@ export default function Assets() {
                   <div className="space-y-2 pt-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Stream Integrity</span>
-                      <span className={`font-mono font-medium ${integrityNum < 90 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                      <span className={`font-mono font-medium ${integrityNum < 90 ? 'text-amber-500' : 'text-sky-400'}`}>
                         {asset.integrity}
                       </span>
                     </div>
-                    <Progress value={integrityNum} className="h-1.5" indicatorClassName={integrityNum < 90 ? 'bg-amber-500' : 'bg-emerald-500'} />
+                    <Progress value={integrityNum} className="h-1.5" indicatorClassName={integrityNum < 90 ? 'bg-amber-500' : 'bg-sky-400'} />
                   </div>
 
                   <div className="bg-background/50 rounded-md p-3 flex justify-between items-center text-sm border border-border/30">

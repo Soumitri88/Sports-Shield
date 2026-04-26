@@ -15,10 +15,10 @@ export default function Overview() {
 
   const stats = [
     { title: "Active Incidents", value: summary?.activeIncidents, icon: Activity, color: "text-destructive", trend: "+12%" },
-    { title: "Viewers Blocked", value: summary?.viewersBlocked?.toLocaleString(), icon: EyeOff, color: "text-emerald-500", trend: "+5%" },
+    { title: "Viewers Blocked", value: summary?.viewersBlocked?.toLocaleString(), icon: EyeOff, color: "text-sky-400", trend: "+5%" },
     { title: "Takedowns Today", value: summary?.takedownsToday, icon: Gavel, color: "text-primary", trend: "+2%" },
     { title: "Protected Assets", value: summary?.protectedAssets, icon: FileLock2, color: "text-blue-500", trend: "0%" },
-    { title: "Revenue Recovered", value: summary?.revenueRecovered, icon: DollarSign, color: "text-emerald-500", trend: "+18%" },
+    { title: "Revenue Recovered", value: summary?.revenueRecovered, icon: DollarSign, color: "text-sky-400", trend: "+18%" },
     { title: "Avg Response", value: summary ? `${summary.avgResponseSeconds}s` : undefined, icon: Clock, color: "text-amber-500", trend: "-1s" },
   ];
 
@@ -44,7 +44,7 @@ export default function Overview() {
                   <div className="text-2xl font-bold">{stat.value}</div>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  <span className={stat.trend.startsWith('+') ? 'text-emerald-500' : stat.trend.startsWith('-') ? 'text-emerald-500' : 'text-muted-foreground'}>{stat.trend}</span> from yesterday
+                  <span className={stat.trend.startsWith('+') ? 'text-sky-400' : stat.trend.startsWith('-') ? 'text-sky-400' : 'text-muted-foreground'}>{stat.trend}</span> from yesterday
                 </p>
               </CardContent>
             </Card>
@@ -171,7 +171,7 @@ export default function Overview() {
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
                       cursor={{fill: 'hsl(var(--muted))', opacity: 0.2}}
                     />
-                    <Bar dataKey="incidents" fill="hsl(var(--accent-foreground))" radius={[4, 4, 0, 0]} barSize={30} />
+                    <Bar dataKey="incidents" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} barSize={30} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
