@@ -67,12 +67,12 @@ export default function Overview() {
                   <AreaChart data={traffic?.points} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorViewers" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorBlocked" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--emerald-500))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--emerald-500))" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -82,8 +82,8 @@ export default function Overview() {
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
                       itemStyle={{ color: 'hsl(var(--foreground))' }}
                     />
-                    <Area type="monotone" dataKey="viewers" stroke="hsl(var(--destructive))" fillOpacity={1} fill="url(#colorViewers)" name="Total Viewers" />
-                    <Area type="monotone" dataKey="blocked" stroke="hsl(var(--emerald-500))" fillOpacity={1} fill="url(#colorBlocked)" name="Blocked Viewers" />
+                    <Area type="monotone" dataKey="viewers" stroke="hsl(var(--chart-1))" strokeWidth={2} fillOpacity={1} fill="url(#colorViewers)" name="Total Viewers" />
+                    <Area type="monotone" dataKey="blocked" stroke="hsl(var(--chart-2))" strokeWidth={2} fillOpacity={1} fill="url(#colorBlocked)" name="Blocked Viewers" />
                   </AreaChart>
                 </ResponsiveContainer>
               )}
