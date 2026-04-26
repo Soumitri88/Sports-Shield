@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Bell, Shield, ShieldAlert, Activity, Database, LogOut, Menu } from "lucide-react";
+import { Search, Bell, Shield, ShieldAlert, Activity, Database, LogOut, Menu, Radar, LayoutGrid, Gavel, Settings as SettingsIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,9 +19,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
   { title: "Overview", url: "/", icon: Activity },
+  { title: "Scanner", url: "/scan", icon: Radar },
+  { title: "Apps", url: "/apps", icon: LayoutGrid },
   { title: "Predictions", url: "/predictions", icon: ShieldAlert },
   { title: "Tracking", url: "/tracking", icon: Shield },
   { title: "Assets", url: "/assets", icon: Database },
+  { title: "Enforcement", url: "/enforcement", icon: Gavel },
+  { title: "Settings", url: "/settings", icon: SettingsIcon },
 ];
 
 export function AppSidebar() {

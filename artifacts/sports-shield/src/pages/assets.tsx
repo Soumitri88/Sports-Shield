@@ -105,7 +105,7 @@ export default function Assets() {
                         {asset.integrity}
                       </span>
                     </div>
-                    <Progress value={integrityNum} className="h-1.5" indicatorClassName={integrityNum < 90 ? 'bg-amber-500' : 'bg-sky-400'} />
+                    <Progress value={integrityNum} className={`h-1.5 ${integrityNum < 90 ? '[&>div]:bg-amber-500' : '[&>div]:bg-sky-400'}`} />
                   </div>
 
                   <div className="bg-background/50 rounded-md p-3 flex justify-between items-center text-sm border border-border/30">

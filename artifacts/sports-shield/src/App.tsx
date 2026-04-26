@@ -9,6 +9,10 @@ import Overview from "@/pages/overview";
 import Predictions from "@/pages/predictions";
 import Tracking from "@/pages/tracking";
 import Assets from "@/pages/assets";
+import Scanner from "@/pages/scanner";
+import AppList from "@/pages/apps";
+import Enforcement from "@/pages/enforcement";
+import Settings from "@/pages/settings";
 
 const queryClient = new QueryClient();
 
@@ -17,9 +21,13 @@ function Router() {
     <AppLayout>
       <Switch>
         <Route path="/" component={Overview} />
+        <Route path="/scan" component={Scanner} />
+        <Route path="/apps" component={AppList} />
         <Route path="/predictions" component={Predictions} />
         <Route path="/tracking" component={Tracking} />
         <Route path="/assets" component={Assets} />
+        <Route path="/enforcement" component={Enforcement} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </AppLayout>
