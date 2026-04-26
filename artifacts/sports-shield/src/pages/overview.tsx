@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from "recharts";
-import { Shield, Eye, TrendingUp, Users, Crosshair, Activity, AlertTriangle, Zap } from "lucide-react";
+import { Shield, Eye, TrendingUp, Users, Crosshair, Activity, AlertTriangle, Zap, Gauge, ScanSearch, ShieldCheck, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
@@ -48,17 +48,24 @@ export default function Overview() {
     setPoisoning(false);
   };
 
-  const activeStreams = (summary?.activeIncidents ?? 0) * 1290;
-  const piratedViews = summary?.viewersBlocked ?? 0;
-  const revenueSaved = summary?.revenueRecovered ?? "—";
-  const takedowns = summary?.takedownsToday ?? 0;
-  const cumulativeTakedowns = takedowns * 170 + 4;
+  const totalScans = 12_450;
+  const violationsDetected = 342;
+  const takedownsSuccessful = 128;
+  const revenueSaved = "$4.2M";
+  const liveRiskLevel = "HIGH";
 
   const stats = [
-    { title: "Active Unauthorized Streams", value: activeStreams.toLocaleString(), icon: Shield, iconColor: "text-primary", trendIcon: TrendingUp, trend: "+12% since last hour", trendColor: "text-destructive" },
-    { title: "Total Pirated Views", value: piratedViews.toLocaleString(), icon: Eye, iconColor: "text-destructive", trendIcon: AlertTriangle, trend: "High Risk Level", trendColor: "text-destructive", pulse: true },
-    { title: "Est. Revenue Saved ($)", value: revenueSaved, icon: TrendingUp, iconColor: "text-sky-400", trendIcon: TrendingUp, trend: "+$150k today", trendColor: "text-sky-400", valueColor: "text-sky-400" },
-    { title: "Automated Takedowns", value: cumulativeTakedowns.toLocaleString(), icon: Users, iconColor: "text-primary", trendIcon: TrendingUp, trend: "94% Success Rate", trendColor: "text-sky-400" },
+    { title: "Total Scans", value: totalScans.toLocaleString(), icon: ScanSearch, iconColor: "text-primary", trendIcon: TrendingUp, trend: "+312 last hour", trendColor: "text-sky-400" },
+    { title: "Violations Detected", value: violationsDetected.toLocaleString(), icon: AlertTriangle, iconColor: "text-destructive", trendIcon: AlertTriangle, trend: "High Risk Level", trendColor: "text-destructive", pulse: true },
+    { title: "Takedowns Successful", value: takedownsSuccessful.toLocaleString(), icon: ShieldCheck, iconColor: "text-sky-400", trendIcon: TrendingUp, trend: "94% Success Rate", trendColor: "text-sky-400" },
+    { title: "Revenue Saved", value: revenueSaved, icon: DollarSign, iconColor: "text-sky-400", trendIcon: TrendingUp, trend: "+$150k today", trendColor: "text-sky-400", valueColor: "text-sky-400" },
+  ];
+
+  const violations = [
+    { id: "V-1001", type: "Unauthorized Stream", source: "Telegram", views: "45,000", status: "Detected", color: "text-amber-400" },
+    { id: "V-1002", type: "Modified Clip (Cropped)", source: "TikTok", views: "120,000", status: "Takedown Sent", color: "text-primary" },
+    { id: "V-1003", type: "App Store Distribution", source: "Google Play", views: "—", status: "Takedown Initiated", color: "text-primary" },
+    { id: "V-1004", type: "Website Streaming", source: "freematch.tv", views: "320,000", status: "Critical", color: "text-destructive" },
   ];
 
   const incidents = tracking?.activeIncidents?.slice(0, 4) ?? [];
@@ -83,7 +90,12 @@ export default function Overview() {
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-sky-400 to-blue-300 bg-clip-text text-transparent">
             Global Piracy Overview
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Real-time tracking of unauthorized sports media broadcasts</p>
+          <div className="mt-2 flex items-center gap-3 flex-wrap">
+            <p className="text-muted-foreground text-sm">Real-time tracking of unauthorized sports media broadcasts</p>
+            <Badge variant="outline" className="bg-destructive/15 text-destructive border-destructive/40 font-bold gap-1.5">
+              <Gauge className="h-3 w-3" /> Live Risk Level: {liveRiskLevel}
+            </Badge>
+          </div>
         </div>
         <Button onClick={forceGlobalScan} disabled={scanning} className="gap-2 bg-primary hover:bg-primary/90">
           <Crosshair className={`h-4 w-4 ${scanning ? "animate-spin" : ""}`} />
@@ -172,7 +184,7 @@ export default function Overview() {
             </div>
             <h2 className="text-xl font-bold">Virus-like Spread Tracker</h2>
             <p className="text-muted-foreground text-sm">
-              AI is currently tracking <span className="text-foreground font-semibold">{activeStreams.toLocaleString()}</span> nodes globally.
+              AI is currently tracking <span className="text-foreground font-semibold">14,200</span> nodes globally.
               The highest density of illegal distribution is currently concentrated in <span className="text-foreground font-semibold">Southeast Asia</span>.
             </p>
             <Button onClick={initiatePoisoning} disabled={poisoning} variant="destructive" className="gap-2 mt-2">
@@ -243,6 +255,24 @@ export default function Overview() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-card/60 backdrop-blur-sm border-border/60">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" /> Recent Violations</CardTitle>
+          <CardDescription>Latest detections from the AI engine</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 divide-y divide-border/60">
+          {violations.map((v) => (
+            <div key={v.id} className="grid grid-cols-12 gap-4 items-center px-6 py-3 text-sm hover:bg-accent/30 transition-colors">
+              <div className="col-span-2 font-mono text-xs text-muted-foreground">{v.id}</div>
+              <div className="col-span-4 font-medium">{v.type}</div>
+              <div className="col-span-2 text-muted-foreground">{v.source}</div>
+              <div className="col-span-2 text-right font-mono">{v.views}</div>
+              <div className={`col-span-2 text-right font-semibold ${v.color}`}>{v.status}</div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <Card className="bg-card/60 backdrop-blur-sm border-border/60">
         <CardHeader>

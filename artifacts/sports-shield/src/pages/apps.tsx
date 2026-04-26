@@ -3,7 +3,7 @@ import { useGetTracking, getGetTrackingQueryKey, useGetSourceBreakdown, getGetSo
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Send, Twitter, Tv, MessageCircle, Hash, Globe, Youtube, Activity } from "lucide-react";
+import { Send, Twitter, Tv, MessageCircle, Hash, Globe, Youtube, Activity, Smartphone, Apple, Monitor, AlertOctagon } from "lucide-react";
 
 const APP_META: Record<string, { icon: React.ReactNode; category: string; blurb: string }> = {
   "Telegram":      { icon: <Send className="h-5 w-5" />,        category: "Messaging",     blurb: "Private channels redistributing live HD streams." },
@@ -55,6 +55,36 @@ export default function AppList() {
         <p className="text-muted-foreground">Apps and surfaces under continuous surveillance for unauthorized rebroadcast.</p>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><AlertOctagon className="h-5 w-5 text-destructive" /> Rogue Streaming Apps</CardTitle>
+          <CardDescription>Identified piracy applications across mobile, web, and connected-TV stores.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 divide-y divide-border/60">
+          {ROGUE_APPS.map((app) => {
+            const Icon = PLATFORM_ICON[app.platform] ?? Globe;
+            return (
+              <div key={app.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-accent/30 transition-colors">
+                <div className="col-span-5 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-md bg-destructive/15 text-destructive flex items-center justify-center">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">{app.name}</div>
+                    <div className="text-xs text-muted-foreground">ID: {app.id}</div>
+                  </div>
+                </div>
+                <div className="col-span-2 text-sm text-muted-foreground">{app.platform}</div>
+                <div className="col-span-2">
+                  <Badge variant="outline" className={RISK_CLS[app.risk_level]}>{app.risk_level.toUpperCase()}</Badge>
+                </div>
+                <div className="col-span-3 text-right text-sm font-semibold text-primary">{app.status}</div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-44" />)}
@@ -105,6 +135,27 @@ export default function AppList() {
     </motion.div>
   );
 }
+
+const ROGUE_APPS: { id: number; name: string; platform: "Android" | "iOS" | "Web" | "Smart TV"; risk_level: "Low" | "Medium" | "High" | "Critical"; status: string }[] = [
+  { id: 1, name: "LiveSportsFree HD", platform: "Android",  risk_level: "High",     status: "Action Required" },
+  { id: 2, name: "SoccerStreams Pro", platform: "iOS",      risk_level: "Critical", status: "Takedown Initiated" },
+  { id: 3, name: "SportsHub Plus",    platform: "Web",      risk_level: "Low",      status: "Monitoring" },
+  { id: 4, name: "GameDay Streams",   platform: "Smart TV", risk_level: "Medium",   status: "Under Investigation" },
+];
+
+const PLATFORM_ICON: Record<string, React.ComponentType<{ className?: string }>> = {
+  Android: Smartphone,
+  iOS: Apple,
+  Web: Globe,
+  "Smart TV": Monitor,
+};
+
+const RISK_CLS: Record<string, string> = {
+  Low:      "bg-sky-500/15 text-sky-400 border-sky-500/30 font-bold text-[10px] tracking-wider",
+  Medium:   "bg-amber-500/15 text-amber-400 border-amber-500/30 font-bold text-[10px] tracking-wider",
+  High:     "bg-orange-500/15 text-orange-400 border-orange-500/30 font-bold text-[10px] tracking-wider",
+  Critical: "bg-destructive/15 text-destructive border-destructive/30 font-bold text-[10px] tracking-wider animate-pulse",
+};
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
