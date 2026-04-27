@@ -25,10 +25,10 @@ catalogs:
       specifier: ^25.3.3
       version: 25.3.5
     '@types/react':
-      specifier: ^19.2.0
+      specifier: ^19.2.14
       version: 19.2.14
     '@types/react-dom':
-      specifier: ^19.2.0
+      specifier: ^19.2.3
       version: 19.2.3
     '@vitejs/plugin-react':
       specifier: ^5.0.4
@@ -164,6 +164,12 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^4.0.0
         version: 4.7.0(vite@5.4.21(@types/node@25.3.5)(lightningcss@1.31.1))
@@ -605,7 +611,7 @@ importers:
     dependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.90.21(react@18.3.1)
+        version: 5.90.21(react@19.1.0)
 
   lib/api-spec:
     devDependencies:
@@ -4336,11 +4342,6 @@ snapshots:
       vite: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@tanstack/query-core@5.90.20': {}
-
-  '@tanstack/react-query@5.90.21(react@18.3.1)':
-    dependencies:
-      '@tanstack/query-core': 5.90.20
-      react: 18.3.1
 
   '@tanstack/react-query@5.90.21(react@19.1.0)':
     dependencies:
