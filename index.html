@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Shield | Monitored Platforms</title>
+    <title>Sports Shield | Unified Mission Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-[#050510] text-slate-200 font-sans overflow-x-hidden text-xs">
     <div id="root"></div>
@@ -15,9 +16,22 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // Component for individual platform cards
+        // --- Shared Components ---
+        const StatCard = ({ title, value, change, icon, color }) => (
+            <div className="bg-[#0a0a1f] border border-slate-800 p-3 rounded-lg shadow-sm hover:border-blue-500 transition-all">
+                <div className="flex justify-between items-start mb-2">
+                    <div className={`p-1.5 rounded-md bg-opacity-10 ${color.bg}`}>
+                        <i data-lucide={icon} className={`w-3.5 h-3.5 ${color.text}`}></i>
+                    </div>
+                    <span className="text-[9px] font-bold text-blue-400 uppercase">{change}</span>
+                </div>
+                <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter">{title}</h3>
+                <p className="text-xl font-bold text-white mt-0.5">{value}</p>
+            </div>
+        );
+
         const PlatformCard = ({ name, type, description, incidents, viewers, share, icon }) => (
             <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all group">
                 <div className="flex justify-between items-start mb-4">
@@ -35,11 +49,7 @@
                         <span className="text-[9px] font-bold text-red-500 uppercase tracking-widest">Live</span>
                     </div>
                 </div>
-
-                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed h-8">
-                    {description}
-                </p>
-
+                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed h-8">{description}</p>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                     <div className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
                         <p className="text-white text-xs font-black">{incidents}</p>
@@ -54,7 +64,6 @@
                         <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Share</p>
                     </div>
                 </div>
-
                 <div className="flex items-center gap-2 text-blue-500/60 text-[9px] font-bold uppercase tracking-tighter">
                     <i data-lucide="refresh-cw" className="w-2.5 h-2.5 animate-spin-slow"></i>
                     Continuous monitoring active
@@ -62,21 +71,73 @@
             </div>
         );
 
+        // --- Main App ---
         function App() {
+            const [view, setView] = useState('Overview');
+            const [scanStatus, setScanStatus] = useState('idle'); 
+            const [url, setUrl] = useState('');
+            const chartInstances = useRef({});
+
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, []);
+                
+                if (view === 'Overview') {
+                    renderCharts();
+                }
+                return () => {
+                    Object.values(chartInstances.current).forEach(chart => chart.destroy());
+                };
+            }, [view]);
+
+            const renderCharts = () => {
+                const trafficCtx = document.getElementById('trafficChart');
+                if (trafficCtx) {
+                    chartInstances.current.traffic = new Chart(trafficCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['07:14', '09:14', '11:14', '13:14', '15:14', '17:14', '19:14', '21:14', '23:14', '01:14', '03:14', '05:14'],
+                            datasets: [{
+                                data: [120, 110, 90, 70, 60, 55, 50, 45, 80, 100, 120, 110],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true, tension: 0.4, pointRadius: 0
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } } } }
+                    });
+                }
+
+                const regionCtx = document.getElementById('regionChart');
+                if (regionCtx) {
+                    chartInstances.current.region = new Chart(regionCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Asia', 'Europe', 'Global', 'Middle East', 'Africa', 'South America', 'North America'],
+                            datasets: [{
+                                data: [240000, 120000, 70000, 65000, 40000, 20000, 10000],
+                                backgroundColor: '#3b82f6', borderRadius: 2, barThickness: 8
+                            }]
+                        },
+                        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } } } }
+                    });
+                }
+            };
+
+            const handleScan = () => {
+                if (!url) return;
+                setScanStatus('scanning');
+                setTimeout(() => {
+                    setScanStatus('completed');
+                    setTimeout(() => window.lucide.createIcons(), 50);
+                }, 2500);
+            };
 
             const platforms = [
                 { name: "Illegal IPTV", type: "IPTV App", description: "Standalone apps streaming pirated channel bundles.", incidents: "2", viewers: "419.4k", share: "17%", icon: "tv" },
                 { name: "TikTok", type: "Web", description: "Generic web players hosted on bulletproof infra.", incidents: "1", viewers: "184.6k", share: "8%", icon: "globe" },
-                { name: "Pirate IPTV", type: "Web", description: "Generic web players hosted on bulletproof infra.", incidents: "1", viewers: "129.0k", share: "8%", icon: "globe" },
                 { name: "Twitter/X", type: "Social", description: "Short clips and embedded live windows of broadcasts.", incidents: "1", viewers: "94.4k", share: "8%", icon: "twitter" },
                 { name: "Telegram", type: "Messaging", description: "Private channels redistributing live HD streams.", incidents: "2", viewers: "79.0k", share: "17%", icon: "send" },
-                { name: "Facebook", type: "Web", description: "Generic web players hosted on bulletproof infra.", incidents: "1", viewers: "67.2k", share: "8%", icon: "globe" },
                 { name: "YouTube", type: "Video", description: "Restream channels masquerading as fan content.", incidents: "1", viewers: "57.8k", share: "8%", icon: "youtube" },
-                { name: "Reddit", type: "Forum", description: "Megathreads aggregating illegal stream links.", incidents: "1", viewers: "39.4k", share: "8%", icon: "hash" },
-                { name: "Twitch", type: "Web", description: "Generic web players hosted on bulletproof infra.", incidents: "1", viewers: "22.4k", share: "8%", icon: "globe" },
                 { name: "Discord", type: "Community", description: "Voice rooms with embedded live players.", incidents: "1", viewers: "16.8k", share: "8%", icon: "message-square" }
             ];
 
@@ -89,27 +150,145 @@
                             <span className="text-lg font-bold text-white tracking-tight">Sports Shield</span>
                         </div>
                         <nav className="space-y-1 flex-1">
-                            {['Overview', 'Scanner', 'Apps', 'Predictions', 'Tracking', 'Assets', 'Enforcement', 'Settings'].map((item) => (
-                                <button key={item} className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[11px] font-medium transition ${item === 'Apps' ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}>
-                                    <i data-lucide={item === 'Apps' ? 'layers' : 'box'} className="w-3.5 h-3.5"></i>
-                                    {item}
+                            {[
+                                { id: 'Overview', icon: 'layout-dashboard' },
+                                { id: 'Scanner', icon: 'search' },
+                                { id: 'Apps', icon: 'layers' },
+                                { id: 'Predictions', icon: 'trending-up' },
+                                { id: 'Tracking', icon: 'map' },
+                                { id: 'Assets', icon: 'lock' },
+                                { id: 'Enforcement', icon: 'gavel' },
+                                { id: 'Settings', icon: 'settings' }
+                            ].map((item) => (
+                                <button 
+                                    key={item.id} 
+                                    onClick={() => { setView(item.id); setScanStatus('idle'); setUrl(''); }}
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[11px] font-medium transition ${view === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+                                >
+                                    <i data-lucide={item.icon} className="w-3.5 h-3.5"></i>
+                                    {item.id}
                                 </button>
                             ))}
                         </nav>
                     </aside>
 
-                    {/* Main Content Area */}
-                    <main className="flex-1 overflow-y-auto p-8">
-                        <header className="mb-10">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">Monitored Platforms</h2>
-                            <p className="text-slate-500 text-[11px] mt-1">Apps and surfaces under continuous surveillance for unauthorized rebroadcast.</p>
+                    <main className="flex-1 overflow-y-auto p-6">
+                        <header className="mb-6">
+                            <h2 className="text-2xl font-bold text-white tracking-tight">
+                                {view === 'Overview' && 'Operations Overview'}
+                                {view === 'Scanner' && 'Stream Scanner'}
+                                {view === 'Apps' && 'Monitored Platforms'}
+                            </h2>
+                            <p className="text-slate-500 text-[11px]">
+                                {view === 'Overview' && 'Real-time piracy intelligence and enforcement metrics.'}
+                                {view === 'Scanner' && 'Probe a stream URL against the fingerprint vault.'}
+                                {view === 'Apps' && 'Apps and surfaces under continuous surveillance.'}
+                            </p>
                         </header>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {platforms.map((p, index) => (
-                                <PlatformCard key={index} {...p} />
-                            ))}
-                        </div>
+                        {/* Page 1: Overview */}
+                        {view === 'Overview' && (
+                            <div className="space-y-4 animate-in fade-in duration-500">
+                                <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+                                    <StatCard title="Active Incidents" value="11" change="+12%" icon="activity" color={{bg:'bg-red-500', text:'text-red-500'}} />
+                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" icon="eye-off" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
+                                    <StatCard title="Takedowns Today" value="5" change="+2%" icon="gavel" color={{bg:'bg-blue-400', text:'text-blue-400'}} />
+                                    <StatCard title="Protected Assets" value="8" change="0%" icon="lock" color={{bg:'bg-blue-600', text:'text-blue-600'}} />
+                                    <StatCard title="Revenue Recovered" value="$4.82M" change="+18%" icon="dollar-sign" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
+                                    <StatCard title="Avg Response" value="47s" change="-1s" icon="clock" color={{bg:'bg-yellow-500', text:'text-yellow-500'}} />
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <div className="lg:col-span-2 bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
+                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-4">24h Piracy Traffic</h4>
+                                        <canvas id="trafficChart" className="h-48"></canvas>
+                                    </div>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
+                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-3">High-Risk Upcoming</h4>
+                                        <div className="space-y-2">
+                                            {['Manchester United vs Liverpool', 'Real Madrid vs Barcelona'].map(match => (
+                                                <div key={match} className="p-2.5 bg-[#050510] rounded-lg border border-slate-800 flex justify-between items-center">
+                                                    <span className="text-[10px] text-white font-medium">{match}</span>
+                                                    <span className="text-red-500 text-[8px] font-bold px-1.5 py-0.5 bg-red-500/10 rounded">CRITICAL</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-4">Regional Distribution</h4>
+                                    <canvas id="regionChart" className="h-44"></canvas>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Page 2: Scanner */}
+                        {view === 'Scanner' && (
+                            <div className="max-w-5xl mx-auto space-y-6">
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-8">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 bg-blue-500/10 rounded-lg"><i data-lucide="search" className="text-blue-500 w-5 h-5"></i></div>
+                                        <h3 className="text-sm font-bold text-white uppercase">Live Probe</h3>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="e.g. https://www.bing.com/..." className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-3 text-xs text-slate-300 font-mono" />
+                                        <button onClick={handleScan} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2">
+                                            <i data-lucide="zap" className="w-4 h-4"></i> Run Scan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {scanStatus !== 'idle' && (
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6">
+                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-6">Probe Pipeline</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {[
+                                                { label: 'Resolving target endpoint', detail: 'Endpoint resolved • 3 hops', icon: 'shield-check' },
+                                                { label: 'Probing media stream signature', detail: 'H.264 1080p • 60fps • 6 Mbps', icon: 'radio' },
+                                                { label: 'Comparing against fingerprint vault', detail: 'Match: UEFA Champions League Final 2026', icon: 'fingerprint' },
+                                                { label: 'Geo-tagging viewer cluster', detail: 'Cluster: South Asia • 47.2K concurrent', icon: 'map-pin' },
+                                                { label: 'Computing risk score', detail: 'Confidence 0.94', icon: 'cpu' }
+                                            ].map((step, i) => (
+                                                <div key={i} className={`flex items-start gap-4 ${scanStatus === 'scanning' && i > 1 ? 'opacity-40' : 'opacity-100'}`}>
+                                                    <i data-lucide={step.icon} className="w-4 h-4 text-blue-500 mt-1"></i>
+                                                    <div><p className="text-[11px] font-bold text-slate-200">{step.label}</p><p className="text-[10px] text-slate-500">{step.detail}</p></div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {scanStatus === 'completed' && (
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 animate-in zoom-in-95 duration-500">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Scan Report</h4>
+                                            <span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-500/20 uppercase tracking-wider">Suspicious</span>
+                                        </div>
+                                        <div className="bg-[#050510] p-3 rounded-lg mb-8 text-[9px] text-slate-400 font-mono truncate">{url}</div>
+                                        <div className="mb-8">
+                                            <div className="flex justify-between text-[10px] mb-2 font-bold uppercase"><span className="text-slate-400">Risk Score</span><span className="text-blue-400">95/100</span></div>
+                                            <div className="w-full bg-slate-800/50 h-2 rounded-full border border-slate-700 overflow-hidden"><div className="bg-blue-600 h-full w-[95%]"></div></div>
+                                        </div>
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                            <div className="p-3 bg-slate-900/40 border border-slate-800/50 rounded-xl"><p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Fingerprint</p><p className="text-[11px] text-white font-mono">0x0023C2E7</p></div>
+                                            <div className="p-3 bg-slate-900/40 border border-slate-800/50 rounded-xl"><p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Region</p><p className="text-[11px] text-white">South Asia</p></div>
+                                            <div className="p-3 bg-slate-900/40 border border-slate-800/50 rounded-xl"><p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Est. Viewers</p><p className="text-[11px] text-white font-bold">78,085</p></div>
+                                            <div className="p-3 bg-slate-900/40 border border-slate-800/50 rounded-xl"><p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Protocol</p><p className="text-[11px] text-white font-mono">DASH</p></div>
+                                        </div>
+                                        <div className="p-4 bg-blue-600/5 border border-blue-600/20 rounded-xl">
+                                            <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Matched Protected Asset</p>
+                                            <p className="text-[13px] text-white font-black uppercase">UEFA Champions League Final 2026</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Page 3: Apps */}
+                        {view === 'Apps' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+                                {platforms.map((p, i) => <PlatformCard key={i} {...p} />)}
+                            </div>
+                        )}
                     </main>
                 </div>
             );
@@ -120,13 +299,8 @@
     </script>
 
     <style>
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
-        }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin-slow 3s linear infinite; }
     </style>
 </body>
 </html>
