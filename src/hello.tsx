@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 export function App() {
   return (
     <div style={{ 
-      backgroundColor: '#1a1a1a', 
+      backgroundColor: '#000044', 
       color: 'cyan', 
       height: '100vh', 
       display: 'flex', 
