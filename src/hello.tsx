@@ -17,7 +17,11 @@ const StatCard = ({ title, value, color }: { title: string, value: string, color
 );
 
 export function App() {
+  const [activeTab, setActiveTab] = useState('Overview'); // Track current page
   const [violations, setViolations] = useState(342);
+  const [view, setView] = React.useState('Overview');
+
+  // ... keep your existing useEffect for the violations timer ...
 
   // Example: Make it "Dynamic" by updating a number every few seconds
   useEffect(() => {
@@ -28,17 +32,26 @@ export function App() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-      
-      {/* 1. Simple Sidebar */}
-      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
-        <h2>Sports Shield</h2>
-        <p style={{ color: 'cyan' }}>• Overview</p>
-        <p>Scanner</p>
-        <p>Tracking</p>
-      </div>
+  <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh' }}>
+    
+    {/* 1. Sidebar */}
+    <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
+      <h2>Sports Shield</h2>
+      {/* ... your sidebar buttons ... */}
+    </div>
 
-      {/* 2. Main Content */}
+    {/* 2. Main Content - THIS IS THE FIX */}
+    <div style={{ flex: 1, padding: '40px' }}>
+      {view === 'Overview' && (
+        <header>
+          <h1 style={{ fontSize: '36px' }}>Global Piracy Overview</h1>
+          {/* ... rest of your content ... */}
+        </header>
+      )}
+    </div>
+
+  </div> // This final closing div is crucial
+);
       <div style={{ flex: 1, padding: '40px' }}>
         <header>
           <h1 style={{ fontSize: '36px' }}>Global Piracy Overview</h1>
@@ -70,8 +83,7 @@ export function App() {
         </button>
       </div>
    // Line 72: ... existing App component code ...
-    </div>
-  );
+   
 } // This is Line 73. Keep this.
 
 // Line 74 should be BLANK.
