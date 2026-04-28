@@ -3,17 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Shield | Command Center</title>
+    <title>Sports Shield | Anti-Piracy Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #050510; color: #cbd5e1; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #050510; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        
+        @keyframes scan-glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        .scanning-line { position: relative; overflow: hidden; }
+        .scanning-line::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: #3b82f6; box-shadow: 0 0 15px #3b82f6;
+            animation: scan-move 2s linear infinite;
+        }
+        @keyframes scan-move {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(400px); }
+        }
     </style>
 </head>
 <body class="text-[13px] selection:bg-blue-500/30 overflow-hidden">
@@ -41,21 +55,40 @@
         const App = () => {
             const [activeTab, setActiveTab] = useState('Overview');
             const [scanStatus, setScanStatus] = useState('idle'); 
-            const [scanUrl, setScanUrl] = useState('youtube.com/live/laliga-hd-stream-es');
+            const [scanUrl, setScanUrl] = useState('youtube.com/live/match-hd-720p');
             const [scanStage, setScanStage] = useState(0);
-            
+            const chartInstances = useRef({});
+
             const stages = [
                 { id: 1, label: "Resolving target endpoint", sub: "Endpoint resolved • 3 hops" },
                 { id: 2, label: "Probing media stream signature", sub: "H.264 1080p • 60fps • 6 Mbps" },
-                { id: 3, label: "Comparing against fingerprint vault", sub: "Match: UEFA Champions League Final 2026" },
+                { id: 3, label: "Comparing against fingerprint vault", sub: "Match: UEFA Champions League Final" },
                 { id: 4, label: "Geo-tagging viewer cluster", sub: "Cluster: South Asia • 47.2K concurrent" },
                 { id: 5, label: "Computing risk score", sub: "Confidence 0.94" }
             ];
 
             useEffect(() => {
                 window.lucide.createIcons();
-                if (activeTab === 'Overview') renderOverviewCharts();
+                if (activeTab === 'Overview') renderOverviewChart();
             }, [activeTab, scanStatus, scanStage]);
+
+            const renderOverviewChart = () => {
+                const ctx = document.getElementById('trafficChart');
+                if (ctx) {
+                    if (chartInstances.current.main) chartInstances.current.main.destroy();
+                    chartInstances.current.main = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['08:10', '10:10', '12:10', '14:10', '16:10', '18:10', '20:10', '22:10'],
+                            datasets: [{
+                                data: [120, 95, 70, 50, 45, 60, 40, 75],
+                                borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.4, pointRadius: 0
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 10 } } }, y: { display: false } } }
+                    });
+                }
+            };
 
             const startScan = () => {
                 setScanStatus('scanning');
@@ -66,94 +99,94 @@
                 setTimeout(() => setScanStatus('result'), stages.length * 700);
             };
 
-            const renderOverviewCharts = () => {
-                const ctx = document.getElementById('trafficChart');
-                if (ctx) {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['08:10', '10:10', '12:10', '14:10', '16:10', '18:10', '20:10', '22:10'],
-                            datasets: [
-                                { label: 'Viewers', data: [120, 90, 85, 70, 60, 95, 110, 130], borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)', tension: 0.4 },
-                                { label: 'Blocked', data: [80, 70, 60, 50, 45, 65, 80, 90], borderColor: '#60a5fa', tension: 0.4 }
-                            ]
-                        },
-                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-                    });
-                }
-            };
-
             return (
                 <div className="flex h-screen w-full bg-[#050510]">
-                    {/* SIDEBAR */}
-                    <aside className="w-[260px] bg-[#03030b] border-r border-slate-800/60 p-6 flex flex-col shrink-0">
-                        <div className="flex items-center gap-3 text-blue-500 mb-12 px-2">
-                            <i data-lucide="shield" className="w-8 h-8 fill-blue-500/20"></i>
-                            <h1 className="text-xl font-black text-white tracking-tighter uppercase">Sports Shield</h1>
+                    {/* Sidebar */}
+                    <aside className="w-[240px] bg-[#03030b] border-r border-slate-800/60 p-5 flex flex-col shrink-0">
+                        <div className="flex items-center gap-3 text-blue-500 mb-10 px-2">
+                            <i data-lucide="shield" className="w-7 h-7 fill-blue-500/20"></i>
+                            <h1 className="text-lg font-black text-white tracking-tighter uppercase">Sports Shield</h1>
                         </div>
-                        <nav className="flex-1 space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 px-3 mb-4 font-mono">Mission Control</p>
-                            {['Overview', 'Scanner', 'Apps', 'Predictions', 'Tracking', 'Assets', 'Enforcement', 'Settings'].map(tab => (
-                                <SidebarItem key={tab} id={tab} icon={
-                                    tab === 'Overview' ? 'activity' : tab === 'Scanner' ? 'search' : tab === 'Apps' ? 'layers' : 
-                                    tab === 'Predictions' ? 'shield-alert' : tab === 'Tracking' ? 'map' : tab === 'Assets' ? 'database' : 
-                                    tab === 'Enforcement' ? 'gavel' : 'settings'
-                                } label={tab} active={activeTab === tab} onClick={setActiveTab} />
+                        <nav className="flex-1 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 px-3 mb-3">Navigation</p>
+                            {[
+                                { id: 'Overview', icon: 'layout-dashboard' },
+                                { id: 'Scanner', icon: 'search' },
+                                { id: 'Apps', icon: 'layers' },
+                                { id: 'Predictions', icon: 'trending-up' },
+                                { id: 'Tracking', icon: 'map' },
+                                { id: 'Assets', icon: 'lock' },
+                                { id: 'Enforcement', icon: 'gavel' },
+                                { id: 'Settings', icon: 'settings' }
+                            ].map(item => (
+                                <SidebarItem key={item.id} id={item.id} icon={item.icon} label={item.id} active={activeTab === item.id} onClick={setActiveTab} />
                             ))}
                         </nav>
                     </aside>
 
-                    {/* MAIN CONTENT */}
-                    <main className="flex-1 overflow-y-auto custom-scrollbar p-12">
+                    {/* Main Workspace */}
+                    <main className="flex-1 overflow-y-auto custom-scrollbar p-10">
                         
-                        {/* OVERVIEW */}
+                        {/* OVERVIEW SECTION - Restored to the cleaner, structured version */}
                         {activeTab === 'Overview' && (
                             <div className="animate-in fade-in duration-500">
-                                <h2 className="text-4xl font-black text-white mb-2 tracking-tight">Operations Overview</h2>
-                                <p className="text-slate-500 mb-10 text-sm">Real-time piracy intelligence and enforcement metrics.</p>
-                                <div className="grid grid-cols-6 gap-4 mb-10">
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Operations Overview</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Real-time piracy intelligence and global enforcement metrics.</p>
+                                
+                                <div className="grid grid-cols-6 gap-3 mb-8">
                                     {[
-                                        { l: 'Active Incidents', v: '11', c: '+12%', i: 'zap' },
-                                        { l: 'Viewers Blocked', v: '285,400', c: '+5%', i: 'eye-off' },
-                                        { l: 'Takedowns Today', v: '5', c: '+2%', i: 'hammer' },
-                                        { l: 'Protected Assets', v: '8', c: '0%', i: 'lock' },
-                                        { l: 'Revenue Recovered', v: '$4.82M', c: '+18%', i: 'dollar-sign' },
-                                        { l: 'Avg Response', v: '47s', c: '-1s', i: 'clock' }
-                                    ].map((s, i) => (
-                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800/50 p-5 rounded-2xl">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <i data-lucide={s.i} className="w-4 h-4 text-blue-500"></i>
-                                                <span className="text-[10px] text-blue-400 font-bold">{s.c}</span>
+                                        { l: 'Active Incidents', v: '11', c: '+12%', i: 'activity', clr: 'text-red-500' },
+                                        { l: 'Viewers Blocked', v: '285,400', c: '+5%', i: 'eye-off', clr: 'text-blue-400' },
+                                        { l: 'Takedowns', v: '5', c: '+2%', i: 'gavel', clr: 'text-blue-500' },
+                                        { l: 'Assets', v: '8', c: '0%', i: 'lock', clr: 'text-blue-600' },
+                                        { l: 'Revenue', v: '$4.82M', c: '+18%', i: 'dollar-sign', clr: 'text-emerald-500' },
+                                        { l: 'Avg Time', v: '47s', c: '-1s', i: 'clock', clr: 'text-orange-500' }
+                                    ].map((s, idx) => (
+                                        <div key={idx} className="bg-[#0a0a1f] border border-slate-800 p-4 rounded-xl">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <i data-lucide={s.i} className={`w-3.5 h-3.5 ${s.clr}`}></i>
+                                                <span className="text-[9px] font-black text-blue-400">{s.c}</span>
                                             </div>
-                                            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">{s.l}</p>
-                                            <p className="text-xl font-black text-white">{s.v}</p>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">{s.l}</p>
+                                            <p className="text-lg font-black text-white leading-none">{s.v}</p>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="bg-[#0a0a1f] border border-slate-800 p-8 rounded-3xl h-[350px]">
-                                    <h4 className="text-xs font-bold text-slate-400 mb-6 uppercase">24h Piracy Traffic</h4>
-                                    <div className="h-[250px]"><canvas id="trafficChart"></canvas></div>
+
+                                <div className="grid grid-cols-3 gap-6">
+                                    <div className="col-span-2 bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl h-[300px]">
+                                        <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest">24h Traffic Impact</h4>
+                                        <div className="h-[200px]"><canvas id="trafficChart"></canvas></div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-2xl flex flex-col justify-between">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-6">AI Efficiency</p>
+                                            <p className="text-5xl font-black text-white">94%</p>
+                                            <p className="text-xs mt-4 opacity-80 leading-relaxed">Optimization across all digital assets via fingerprinting.</p>
+                                        </div>
+                                        <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20">System Report</button>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* SCANNER */}
+                        {/* SCANNER SECTION - Improved Staged Pipeline */}
                         {activeTab === 'Scanner' && (
-                            <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
-                                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Stream Scanner</h2>
-                                <p className="text-slate-500 mb-10 text-sm font-medium">Probe a stream URL for piracy signals against the fingerprint vault.</p>
-                                
-                                <div className="bg-[#0a0a1f] border border-slate-800 p-10 rounded-3xl mb-8">
-                                    <div className="flex gap-4 mb-4">
-                                        <input type="text" value={scanUrl} onChange={(e)=>setScanUrl(e.target.value)} className="flex-1 bg-[#050510] border border-slate-800 rounded-2xl px-6 py-4 text-blue-400 font-mono text-sm focus:outline-none" />
-                                        <button onClick={startScan} className="bg-blue-600 hover:bg-blue-500 px-8 rounded-2xl text-xs font-black uppercase text-white transition-all active:scale-95">Run Scan</button>
+                            <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Stream Scanner</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Direct probe interface for validating suspicious stream URLs.</p>
+
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-10 mb-6">
+                                    <div className="flex gap-3 mb-4">
+                                        <input type="text" value={scanUrl} onChange={(e)=>setScanUrl(e.target.value)} className="flex-1 bg-[#050510] border border-slate-800 rounded-xl px-5 py-4 text-blue-400 font-mono text-sm focus:outline-none focus:border-blue-500 transition-all" />
+                                        <button onClick={startScan} className="bg-blue-600 hover:bg-blue-500 text-white font-black px-10 rounded-xl text-xs uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95">Run Scan</button>
                                     </div>
-                                    <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Try: t.me/+RedDevilsHD-EPL | iptv-cricstream.app/channel/star-sports-1</p>
+                                    <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Probe Input: WebRTC / HLS / DASH / RTMP</p>
                                 </div>
 
                                 {scanStatus === 'scanning' && (
-                                    <div className="bg-[#0a0a1f] border border-slate-800 p-10 rounded-3xl space-y-6">
-                                        <h3 className="text-[10px] font-black uppercase text-slate-500 mb-4 tracking-[0.2em]">Probe Pipeline</h3>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-10 space-y-6 scanning-line">
+                                        <h3 className="text-[10px] font-black uppercase text-slate-500 mb-4 tracking-widest">Probe Pipeline</h3>
                                         {stages.map((stage, idx) => (
                                             <div key={stage.id} className={`flex gap-4 items-start transition-all duration-500 ${scanStage > idx ? 'opacity-100 translate-x-0' : 'opacity-20 -translate-x-2'}`}>
                                                 <i data-lucide={scanStage > idx ? "check-circle" : "circle"} className={`w-4 h-4 mt-1 ${scanStage > idx ? 'text-blue-500' : 'text-slate-600'}`}></i>
@@ -167,49 +200,43 @@
                                 )}
 
                                 {scanStatus === 'result' && (
-                                    <div className="bg-[#0a0a1f] border border-red-500/20 p-10 rounded-3xl shadow-2xl shadow-red-900/10 animate-in zoom-in-95 duration-300">
-                                        <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-800">
-                                            <p className="text-xs font-bold text-slate-500 uppercase">Scan Report: <span className="text-red-500 ml-2">Confirmed Piracy</span></p>
-                                            <p className="text-2xl font-black text-white">96/100 <span className="text-[10px] text-red-500 uppercase tracking-tighter">Risk Score</span></p>
+                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-10 animate-in zoom-in-95 duration-300">
+                                        <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-800/50">
+                                            <p className="text-xs font-bold text-slate-500 uppercase">Analysis Report: <span className="text-red-500 ml-2">Piracy Confirmed</span></p>
+                                            <p className="text-2xl font-black text-white">96% <span className="text-[10px] text-red-500 uppercase">Risk Score</span></p>
                                         </div>
                                         <div className="grid grid-cols-4 gap-4 mb-8">
-                                            {[ {l:'Fingerprint', v:'0x00D57A74'}, {l:'Region', v:'Europe'}, {l:'Est. Viewers', v:'16,196'}, {l:'Protocol', v:'HLS'} ].map((r,i)=>(
+                                            {[ {l:'Fingerprint', v:'0x00D57A'}, {l:'Region', v:'Europe'}, {l:'Viewers', v:'16,196'}, {l:'Protocol', v:'HLS'} ].map((r,i)=>(
                                                 <div key={i} className="p-4 bg-[#050510] rounded-xl border border-slate-800"><p className="text-[9px] font-bold text-slate-600 uppercase mb-1">{r.l}</p><p className="font-mono text-white text-xs">{r.v}</p></div>
                                             ))}
                                         </div>
-                                        <div className="p-5 bg-red-500/5 border border-red-500/20 rounded-2xl mb-8">
-                                            <p className="text-[10px] text-red-500 font-black uppercase mb-1">Matched Protected Asset</p>
-                                            <p className="text-white font-bold">UEFA Champions League Final 2026</p>
-                                        </div>
-                                        <button className="w-full py-4 bg-red-600 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-red-500 transition-all">Initiate Automated Takedown</button>
+                                        <button className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-red-500 transition-all">Initiate Automated Takedown</button>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* PREDICTIONS */}
+                        {/* PREDICTIONS SECTION */}
                         {activeTab === 'Predictions' && (
                             <div className="animate-in fade-in duration-500">
-                                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Predictive Intelligence</h2>
-                                <p className="text-slate-500 mb-10 text-sm">AI-driven forecasts for upcoming high-risk broadcasting events.</p>
-                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-3xl overflow-hidden">
-                                    <table className="w-full text-left">
-                                        <thead className="bg-[#050510] border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                            <tr><th className="p-6">Match / Event</th><th className="p-6">League</th><th className="p-6">Time to Event</th><th className="p-6">Est. Piracy</th><th className="p-6 text-right">Risk Level</th></tr>
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Predictive Intelligence</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">AI-driven forecasts for high-risk broadcasting events.</p>
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl overflow-hidden">
+                                    <table className="w-full text-left text-[12px]">
+                                        <thead className="bg-[#050510] text-slate-500 uppercase font-bold text-[10px] border-b border-slate-800 tracking-widest">
+                                            <tr><th className="px-6 py-4">Match / Event</th><th className="px-6 py-4">League</th><th className="px-6 py-4">Est. Piracy</th><th className="px-6 py-4 text-right">Risk Level</th></tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-800/40">
                                             {[
-                                                { m: 'Manchester United vs Liverpool', l: 'Premier League', t: '30 mins', p: '1.2M+ viewers', r: 'CRITICAL' },
-                                                { m: 'Real Madrid vs Barcelona', l: 'La Liga', t: '2h 15m', p: '2.1M+ viewers', r: 'CRITICAL' },
-                                                { m: 'Lakers vs Celtics', l: 'NBA', t: '5h 40m', p: '640k+ viewers', r: 'HIGH' },
-                                                { m: 'India vs Pakistan — T20', l: 'ICC World Cup', t: '3d 09h', p: '4.5M+ viewers', r: 'CRITICAL' }
+                                                { m: 'Manchester United vs Liverpool', l: 'Premier League', p: '1.2M+', r: 'Critical' },
+                                                { m: 'Real Madrid vs Barcelona', l: 'La Liga', p: '2.1M+', r: 'Critical' },
+                                                { m: 'Lakers vs Celtics', l: 'NBA', p: '640k+', r: 'High' }
                                             ].map((ev, i) => (
                                                 <tr key={i} className="hover:bg-slate-800/20 transition-all">
-                                                    <td className="p-6 font-bold text-white">{ev.m}</td>
-                                                    <td className="p-6 text-slate-400">{ev.l}</td>
-                                                    <td className="p-6 text-blue-400 font-mono text-xs">{ev.t}</td>
-                                                    <td className="p-6 text-white font-bold">{ev.p}</td>
-                                                    <td className="p-6 text-right"><span className={`px-3 py-1 rounded-lg text-[9px] font-black ${ev.r==='CRITICAL' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-500'}`}>{ev.r}</span></td>
+                                                    <td className="px-6 py-4 font-bold text-white">{ev.m}</td>
+                                                    <td className="px-6 py-4 text-slate-500">{ev.l}</td>
+                                                    <td className="px-6 py-4 text-red-500 font-bold">{ev.p}</td>
+                                                    <td className="px-6 py-4 text-right"><span className="bg-red-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase">{ev.r}</span></td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -218,28 +245,27 @@
                             </div>
                         )}
 
-                        {/* APPS */}
+                        {/* APPS SECTION */}
                         {activeTab === 'Apps' && (
                             <div className="animate-in fade-in duration-500">
-                                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Monitored Platforms</h2>
-                                <p className="text-slate-500 mb-10 text-sm">Surfaces under continuous surveillance for unauthorized rebroadcast.</p>
-                                <div className="grid grid-cols-3 gap-6">
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Monitored Platforms</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Continuous surveillance of third-party streaming surfaces.</p>
+                                <div className="grid grid-cols-3 gap-5">
                                     {[
-                                        { n: 'Illegal IPTV', d: 'Standalone apps streaming pirated channel bundles.', v: '419.4k', i: 2 },
-                                        { n: 'TikTok', d: 'Generic web players hosted on bulletproof infra.', v: '184.6k', i: 1 },
-                                        { n: 'Twitter/X', d: 'Short clips and embedded live windows of broadcasts.', v: '94.4k', i: 1 },
-                                        { n: 'Telegram', d: 'Private channels redistributing live HD streams.', v: '79.0k', i: 2 },
-                                        { n: 'Discord', d: 'Voice rooms with embedded live players.', v: '16.8k', i: 1 }
+                                        { n: 'Illegal IPTV', v: '419.4k', s: '17%', icon: 'tv' },
+                                        { n: 'TikTok Live', v: '184.6k', s: '8%', icon: 'video' },
+                                        { n: 'Telegram', v: '79.0k', s: '12%', icon: 'send' }
                                     ].map((app, i) => (
-                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 p-8 rounded-3xl">
+                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-6 hover:border-blue-500/40 transition-all">
                                             <div className="flex justify-between items-start mb-6">
-                                                <h4 className="text-white font-black text-lg">{app.n}</h4>
-                                                <span className="flex items-center gap-1.5 text-[8px] font-black text-red-500 uppercase bg-red-500/5 px-2 py-1 rounded-full"><span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span> Live</span>
+                                                <i data-lucide={app.icon} className="w-5 h-5 text-blue-500 bg-blue-500/10 p-2 rounded-lg box-content"></i>
+                                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                                             </div>
-                                            <p className="text-slate-500 text-xs mb-8 leading-relaxed">{app.d}</p>
-                                            <div className="flex gap-4">
-                                                <div className="flex-1 p-4 bg-[#050510] rounded-2xl border border-slate-800"><p className="text-[9px] font-bold text-slate-600 uppercase mb-1">Incidents</p><p className="text-white font-bold">{app.i}</p></div>
-                                                <div className="flex-1 p-4 bg-[#050510] rounded-2xl border border-slate-800"><p className="text-[9px] font-bold text-slate-600 uppercase mb-1">Viewers</p><p className="text-white font-bold">{app.v}</p></div>
+                                            <h4 className="text-sm font-bold text-white">{app.n}</h4>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase mt-1 mb-4">Live Monitoring Active</p>
+                                            <div className="flex gap-3">
+                                                <div className="flex-1 bg-[#050510] p-3 rounded-xl border border-slate-800/50 text-center text-white text-xs font-black">{app.v}</div>
+                                                <div className="flex-1 bg-[#050510] p-3 rounded-xl border border-slate-800/50 text-center text-white text-xs font-black">{app.s}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -247,31 +273,19 @@
                             </div>
                         )}
 
-                        {/* SETTINGS */}
+                        {/* SETTINGS SECTION */}
                         {activeTab === 'Settings' && (
-                            <div className="animate-in fade-in duration-500 max-w-3xl">
-                                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">System Settings</h2>
-                                <p className="text-slate-500 mb-10 text-sm">Configure detection thresholds and enforcement policies.</p>
-                                <div className="space-y-6">
-                                    <div className="bg-[#0a0a1f] border border-slate-800 p-8 rounded-3xl">
-                                        <h4 className="text-white font-bold mb-6 flex items-center gap-2"><i data-lucide="cpu" className="w-4 h-4 text-blue-500"></i> Detection Engine</h4>
-                                        <div className="space-y-8">
-                                            <div>
-                                                <div className="flex justify-between mb-4 text-[11px] font-bold text-slate-400 uppercase"><span>Risk Score Threshold</span><span className="text-blue-500">75/100</span></div>
-                                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full w-3/4 bg-blue-600 shadow-[0_0_10px_#2563eb]"></div></div>
-                                            </div>
-                                            <div className="flex items-center justify-between p-4 bg-[#050510] rounded-2xl border border-slate-800">
-                                                <div><p className="text-white font-bold text-xs">Content Poisoning Injection</p><p className="text-[10px] text-slate-600 mt-1">Inject corrupted segments into confirmed pirated streams.</p></div>
-                                                <div className="w-10 h-5 bg-blue-600 rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
-                                            </div>
-                                        </div>
+                            <div className="animate-in fade-in duration-500 max-w-2xl">
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Settings</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">System configurations and API management.</p>
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 space-y-6">
+                                    <div className="flex items-center justify-between p-4 bg-[#050510] rounded-xl border border-slate-800/50">
+                                        <div><p className="text-white font-bold text-xs">Automated Takedowns</p><p className="text-[10px] text-slate-600">Instantly send DMCA on 95%+ match.</p></div>
+                                        <div className="w-8 h-4 bg-blue-600 rounded-full relative"><div className="absolute right-1 top-1 w-2 h-2 bg-white rounded-full"></div></div>
                                     </div>
-                                    <div className="bg-[#0a0a1f] border border-slate-800 p-8 rounded-3xl">
-                                        <h4 className="text-white font-bold mb-6 flex items-center gap-2"><i data-lucide="globe" className="w-4 h-4 text-blue-500"></i> Integrations</h4>
-                                        <div className="space-y-4">
-                                            <div className="p-4 bg-[#050510] rounded-2xl border border-slate-800"><p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Incident Webhook URL</p><p className="text-blue-400 font-mono text-xs">https://hooks.shield.io/incidents</p></div>
-                                            <div className="p-4 bg-[#050510] rounded-2xl border border-slate-800 flex justify-between items-center"><p className="text-blue-400 font-mono text-xs tracking-widest">ssk_live_••••••••••••••••3a91</p><button className="text-[10px] font-black uppercase text-slate-500 border border-slate-800 px-3 py-1 rounded-lg hover:bg-slate-800">Rotate</button></div>
-                                        </div>
+                                    <div className="p-4 bg-[#050510] rounded-xl border border-slate-800/50">
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">API Webhook</p>
+                                        <p className="text-blue-400 font-mono text-xs">https://api.sportsshield.io/v1/hook_active_3841</p>
                                     </div>
                                 </div>
                             </div>
@@ -279,12 +293,13 @@
 
                         {/* OTHER TABS FALLBACK */}
                         {!['Overview', 'Scanner', 'Apps', 'Predictions', 'Settings'].includes(activeTab) && (
-                            <div className="flex flex-col items-center justify-center h-[60vh] opacity-20">
-                                <i data-lucide="construction" className="w-16 h-16 mb-4"></i>
-                                <h3 className="text-2xl font-black uppercase tracking-tighter">{activeTab} Secure Module</h3>
-                                <p className="text-sm">Interface encrypted. Awaiting biometric authentication.</p>
+                            <div className="flex flex-col items-center justify-center h-[60vh] opacity-20 text-center">
+                                <i data-lucide="shield-off" className="w-16 h-16 mb-4"></i>
+                                <h3 className="text-xl font-black uppercase tracking-widest">{activeTab}</h3>
+                                <p className="text-xs">Secure interface encrypted. Access denied.</p>
                             </div>
                         )}
+
                     </main>
                 </div>
             );
