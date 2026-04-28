@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom/client'; // ADD THIS LINE
 
 // A reusable Card component for those stats
 const StatCard = ({ title, value, color }: { title: string, value: string, color: string }) => (
@@ -68,6 +69,12 @@ export function App() {
           Force Global Scan
         </button>
       </div>
+   // Line 72: ... existing App component code ...
     </div>
   );
-}
+} // This is Line 73. Keep this.
+
+// Line 74 should be BLANK.
+const root = ReactDOM.createRoot(document.getElementById('root')!); // Line 75
+root.render(<App />); // Line 76
+// Line 77 and 78 should be BLANK.
