@@ -16,68 +16,59 @@
   const { useState, useEffect } = React;
 
   function App() {
-    const [view, setView] = useState('Overview');
-    const [violations, setViolations] = useState(351);
+  const [view, setView] = React.useState('Overview');
+  const [violations, setViolations] = React.useState(351);
 
-    return (
-      <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-        {/* Sidebar */}
-        <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
-          <h2>Sports Shield</h2>
-          <p onClick={() => setView('Overview')} style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : 'white' }}>• Overview</p>
-          <p onClick={() => setView('Scanner')} style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : 'white' }}>• Scanner</p>
-        </div>
-
-        {/* Main Content */}
-        <div style={{ flex: 1, padding: '40px' }}>
-  {/* ONLY show this if view is Overview */}
-  {view === 'Overview' && (
-    <div>
-      <h1>Global Piracy Overview</h1>
-      <p style={{ color: '#aaa' }}>Real-time tracking of unauthorized broadcasts</p>
-      {/* Your current StatCards (Total Scans, Violations, etc.) go here */}
-      <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '8px', width: '200px' }}>
-          <h3>VIOLATIONS</h3>
-          <h2 style={{ color: '#ff4444' }}>{violations}</h2>
+  return (
+    <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+      
+      {/* 1. SIDEBAR */}
+      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
+        <h2 style={{ color: 'cyan' }}>Sports Shield</h2>
+        <p onClick={() => setView('Overview')} style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : 'white', fontWeight: view === 'Overview' ? 'bold' : 'normal' }}>• Overview</p>
+        <p onClick={() => setView('Scanner')} style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : 'white', fontWeight: view === 'Scanner' ? 'bold' : 'normal' }}>• Scanner</p>
+        <p onClick={() => setView('Tracking')} style={{ cursor: 'pointer', color: view === 'Tracking' ? 'cyan' : 'white', fontWeight: view === 'Tracking' ? 'bold' : 'normal' }}>• Tracking</p>
       </div>
-    </div>
-  )}
 
-  {/* ONLY show this if view is Scanner */}
-  {view === 'Scanner' && (
-    <div>
-      <h1>AI Network Scanner</h1>
-      <p style={{ color: '#00ff00' }}>● System Active: Scanning global IP addresses...</p>
-      <div style={{ background: '#111', padding: '20px', borderRadius: '8px', border: '1px solid #333', marginTop: '20px' }}>
-        <p style={{ color: 'cyan', fontFamily: 'monospace' }}>[09:45] Analyzing YouTube Live Feed...</p>
-        <p style={{ color: '#ff4444', fontFamily: 'monospace' }}>[09:46] FLAG: Unauthorized stream detected on "sports-live.ru"</p>
-      </div>
-    </div>
-  )}
-
-  {/* ONLY show this if view is Tracking */}
-  {view === 'Tracking' && (
-    <div>
-      <h1>Asset Tracking</h1>
-      <p>Digital fingerprinting and watermark status.</p>
-      <div style={{ marginTop: '20px', padding: '15px', border: '1px dashed #555' }}>
-        <p>✓ Forensic Watermark active for Premier League Feed</p>
-      </div>
-    </div>
-  )}
-</div>
-          ) : (
-            <div>
-              <h1>AI Network Scanner</h1>
-              <p>Scanning active streams...</p>
-              <div style={{ color: '#00ff00' }}>[SAFE] YouTube Official Feed</div>
+      {/* 2. MAIN CONTENT AREA */}
+      <div style={{ flex: 1, padding: '40px' }}>
+        
+        {view === 'Overview' && (
+          <div>
+            <h1>Global Piracy Overview</h1>
+            <p style={{ color: '#aaa' }}>Real-time tracking of unauthorized sports media broadcasts</p>
+            <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '12px', width: '250px', marginTop: '20px' }}>
+              <h3 style={{ fontSize: '14px', margin: 0 }}>VIOLATIONS DETECTED</h3>
+              <h2 style={{ color: '#ff4444', fontSize: '48px', margin: '10px 0' }}>{violations}</h2>
             </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+          </div>
+        )}
 
+        {view === 'Scanner' && (
+          <div>
+            <h1>AI Network Scanner</h1>
+            <p style={{ color: '#00ff00' }}>● System Active: Scanning global streams...</p>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
+               <p style={{ color: 'cyan' }}>[09:58] Analyzing YouTube Live Feed...</p>
+               <p style={{ color: '#ff4444' }}>[09:59] FLAG: Unauthorized broadcast on "live-sports-free.xyz"</p>
+            </div>
+          </div>
+        )}
+
+        {view === 'Tracking' && (
+          <div>
+            <h1>Asset Tracking</h1>
+            <p>Digital fingerprinting status for official feeds.</p>
+            <div style={{ marginTop: '20px', padding: '15px', border: '1px dashed #555' }}>
+               <p>✓ Forensic Watermark active for Premier League Feed</p>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
   const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(<App />);
 </script>
