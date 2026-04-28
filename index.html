@@ -297,18 +297,17 @@
                             </div>
                         )}
 
-                        {/* 6. ASSETS (NEW) */}
-                        {/* 6. ASSETS (REFINED) */}
+                        {/* 6. ASSETS (REFINED PER SCREENSHOT) */}
 {activeTab === 'Assets' && (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex justify-between items-end mb-8">
             <div>
-                <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Asset Intelligence</h2>
-                <p className="text-slate-500 text-[11px] font-mono mt-1 uppercase tracking-widest">Global Fingerprint Registry • 8 Active Shields</p>
+                <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Asset Intelligence</h2>
+                <p className="text-blue-500 text-[10px] font-mono mt-1 uppercase tracking-[0.3em] font-bold">Active Shield Protocol: Enabled</p>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest">
+            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(59,130,246,0.3)]">
                 <i data-lucide="plus" className="w-3.5 h-3.5"></i>
-                Register New Asset
+                Register Asset
             </button>
         </div>
 
@@ -317,54 +316,57 @@
                 { 
                     title: 'UEFA Champions League', 
                     type: 'ULTRA-HD BROADCAST', 
-                    status: 'ENFORCED', 
-                    id: 'ASSET_ID: 0x824...f1', 
+                    status: 'SECURED', 
+                    id: 'FINGERPRINT: 0x824...f1', 
                     sync: '99.9%',
                     color: 'text-blue-500',
-                    bg: 'bg-blue-500/5'
+                    border: 'border-blue-500/30',
+                    glow: 'shadow-[0_0_15px_rgba(59,130,246,0.1)]'
                 },
                 { 
                     title: 'NBA Finals 2026', 
                     type: 'OTT GLOBAL FEED', 
                     status: 'ENFORCED', 
-                    id: 'ASSET_ID: 0x119...a4', 
+                    id: 'FINGERPRINT: 0x119...a4', 
                     sync: '98.4%',
                     color: 'text-emerald-500',
-                    bg: 'bg-emerald-500/5'
+                    border: 'border-emerald-500/30',
+                    glow: 'shadow-[0_0_15px_rgba(16,185,129,0.1)]'
                 },
                 { 
-                    title: 'Premier League', 
+                    title: 'ICC World Cup', 
                     type: 'LIVE MULTICAST', 
                     status: 'MONITORING', 
-                    id: 'ASSET_ID: 0x442...c9', 
+                    id: 'FINGERPRINT: 0x442...c9', 
                     sync: '100%',
                     color: 'text-orange-500',
-                    bg: 'bg-orange-500/5'
+                    border: 'border-orange-500/30',
+                    glow: 'shadow-[0_0_15px_rgba(249,115,22,0.1)]'
                 }
             ].map((asset, i) => (
-                <div key={i} className="group relative bg-[#0a0a1f] border border-slate-800/60 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-500 overflow-hidden">
-                    {/* Background Accent */}
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${asset.bg} blur-[60px] -mr-16 -mt-16 group-hover:opacity-100 opacity-50 transition-opacity`}></div>
+                <div key={i} className={`group relative bg-[#0a0a1f] border ${asset.border} ${asset.glow} rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300 overflow-hidden`}>
+                    {/* Interactive Scan Line Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 scanning-line pointer-events-none"></div>
                     
                     <div className="relative z-10">
                         <div className="flex justify-between items-start mb-6">
-                            <div className={`p-3 rounded-xl bg-slate-900/50 border border-slate-800 ${asset.color}`}>
-                                <i data-lucide="shield-check" className="w-5 h-5"></i>
+                            <div className={`p-3 rounded-xl bg-black/40 border border-slate-800 ${asset.color}`}>
+                                <i data-lucide="cpu" className="w-5 h-5"></i>
                             </div>
                             <div className="text-right">
-                                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">Neural Sync</p>
-                                <p className="text-xs font-mono text-white">{asset.sync}</p>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Neural Integrity</p>
+                                <p className="text-xs font-mono text-white tracking-tighter">{asset.sync}</p>
                             </div>
                         </div>
 
-                        <h4 className="text-white font-black text-sm uppercase tracking-tight mb-1">{asset.title}</h4>
-                        <p className="text-[10px] text-slate-500 font-bold mb-6 tracking-widest">{asset.type}</p>
+                        <h4 className="text-white font-black text-sm uppercase tracking-tighter mb-1">{asset.title}</h4>
+                        <p className="text-[9px] text-slate-500 font-bold mb-6 tracking-[0.2em]">{asset.type}</p>
 
-                        <div className="space-y-3 pt-4 border-t border-slate-800/50">
+                        <div className="space-y-3 pt-4 border-t border-slate-800/80">
                             <div className="flex justify-between items-center">
-                                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-tighter">{asset.id}</span>
-                                <span className={`flex items-center gap-1.5 text-[9px] font-black uppercase px-2 py-1 rounded-md bg-black/40 border border-slate-800 ${asset.color}`}>
-                                    <span className={`w-1 h-1 rounded-full ${asset.color.replace('text', 'bg')} animate-pulse`}></span>
+                                <span className="text-[9px] font-mono text-slate-600 font-bold">{asset.id}</span>
+                                <span className={`flex items-center gap-1.5 text-[8px] font-black uppercase px-2 py-1 rounded bg-black/60 border border-slate-800 ${asset.color}`}>
+                                    <span className={`w-1 h-1 rounded-full ${asset.color.replace('text', 'bg')} pulse-red`}></span>
                                     {asset.status}
                                 </span>
                             </div>
@@ -374,25 +376,22 @@
             ))}
         </div>
 
-        {/* Global Security Summary (Inspired by Screenshot Details) */}
-        <div className="mt-8 bg-blue-600/5 border border-blue-500/20 rounded-2xl p-6 flex items-center justify-between">
-            <div className="flex gap-10">
-                <div>
-                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Total Protected Volume</p>
-                    <p className="text-xl font-black text-white">4.2 PB / Hour</p>
+        {/* System Diagnostic Footer */}
+        <div className="mt-8 grid grid-cols-4 gap-4">
+            {[
+                { label: 'Bandwidth Leakage', val: '0.00kb', icon: 'zap' },
+                { label: 'Asset Uptime', val: '99.99%', icon: 'activity' },
+                { label: 'IP Lock Status', val: 'Global', icon: 'globe' },
+                { label: 'Vault Security', val: 'Lvl 4', icon: 'shield' }
+            ].map((stat, idx) => (
+                <div key={idx} className="bg-slate-900/30 border border-slate-800/50 p-4 rounded-xl flex items-center gap-4">
+                    <i data-lucide={stat.icon} className="w-4 h-4 text-blue-500 opacity-50"></i>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{stat.label}</p>
+                        <p className="text-xs font-bold text-white">{stat.val}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Detection Latency</p>
-                    <p className="text-xl font-black text-white">142ms</p>
-                </div>
-                <div>
-                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Enforcement Success</p>
-                    <p className="text-xl font-black text-white">99.1%</p>
-                </div>
-            </div>
-            <div className="text-right">
-                <i data-lucide="cpu" className="w-8 h-8 text-blue-500/20"></i>
-            </div>
+            ))}
         </div>
     </div>
 )}
