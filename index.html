@@ -1,76 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sports Shield</title>
-  </head>
-  <body>
-  <div id="root"></div>
-<script type="text/babel"></script>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Shield Dashboard</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #000033;">
+    <div id="root"></div>
 
-<script type="text/babel">
-  const { useState, useEffect } = React;
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  function App() {
-  const [view, setView] = React.useState('Overview');
-  const [violations, setViolations] = React.useState(351);
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  return (
-    <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-      
-      {/* 1. SIDEBAR */}
-      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
-        <h2 style={{ color: 'cyan' }}>Sports Shield</h2>
-        <p onClick={() => setView('Overview')} style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : 'white', fontWeight: view === 'Overview' ? 'bold' : 'normal' }}>• Overview</p>
-        <p onClick={() => setView('Scanner')} style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : 'white', fontWeight: view === 'Scanner' ? 'bold' : 'normal' }}>• Scanner</p>
-        <p onClick={() => setView('Tracking')} style={{ cursor: 'pointer', color: view === 'Tracking' ? 'cyan' : 'white', fontWeight: view === 'Tracking' ? 'bold' : 'normal' }}>• Tracking</p>
-      </div>
+        function App() {
+            const [view, setView] = useState('Overview');
+            const [violations, setViolations] = useState(351);
 
-      {/* 2. MAIN CONTENT AREA */}
-      <div style={{ flex: 1, padding: '40px' }}>
-        
-        {view === 'Overview' && (
-          <div>
-            <h1>Global Piracy Overview</h1>
-            <p style={{ color: '#aaa' }}>Real-time tracking of unauthorized sports media broadcasts</p>
-            <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '12px', width: '250px', marginTop: '20px' }}>
-              <h3 style={{ fontSize: '14px', margin: 0 }}>VIOLATIONS DETECTED</h3>
-              <h2 style={{ color: '#ff4444', fontSize: '48px', margin: '10px 0' }}>{violations}</h2>
-            </div>
-          </div>
-        )}
+            // Simple timer to make violations increase slightly over time
+            useEffect(() => {
+                const timer = setInterval(() => {
+                    setViolations(prev => prev + Math.floor(Math.random() * 2));
+                }, 5000);
+                return () => clearInterval(timer);
+            }, []);
 
-        {view === 'Scanner' && (
-          <div>
-            <h1>AI Network Scanner</h1>
-            <p style={{ color: '#00ff00' }}>● System Active: Scanning global streams...</p>
-            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '8px', marginTop: '20px' }}>
-               <p style={{ color: 'cyan' }}>[09:58] Analyzing YouTube Live Feed...</p>
-               <p style={{ color: '#ff4444' }}>[09:59] FLAG: Unauthorized broadcast on "live-sports-free.xyz"</p>
-            </div>
-          </div>
-        )}
+            return (
+                <div style={{ display: 'flex', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+                    
+                    {/* 1. SIDEBAR */}
+                    <div style={{ width: '220px', borderRight: '1px solid #444', padding: '30px 20px', backgroundColor: '#000022' }}>
+                        <h2 style={{ color: 'cyan', fontSize: '24px', marginBottom: '40px' }}>Sports Shield</h2>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <p 
+                                onClick={() => setView('Overview')} 
+                                style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : '#aaa', fontWeight: view === 'Overview' ? 'bold' : 'normal', margin: 0 }}
+                            >
+                                • Overview
+                            </p>
+                            <p 
+                                onClick={() => setView('Scanner')} 
+                                style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : '#aaa', fontWeight: view === 'Scanner' ? 'bold' : 'normal', margin: 0 }}
+                            >
+                                • Scanner
+                            </p>
+                            <p 
+                                onClick={() => setView('Tracking')} 
+                                style={{ cursor: 'pointer', color: view === 'Tracking' ? 'cyan' : '#aaa', fontWeight: view === 'Tracking' ? 'bold' : 'normal', margin: 0 }}
+                            >
+                                • Tracking
+                            </p>
+                        </div>
+                    </div>
 
-        {view === 'Tracking' && (
-          <div>
-            <h1>Asset Tracking</h1>
-            <p>Digital fingerprinting status for official feeds.</p>
-            <div style={{ marginTop: '20px', padding: '15px', border: '1px dashed #555' }}>
-               <p>✓ Forensic Watermark active for Premier League Feed</p>
-            </div>
-          </div>
-        )}
+                    {/* 2. MAIN CONTENT AREA */}
+                    <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+                        
+                        {/* VIEW: OVERVIEW */}
+                        {view === 'Overview' && (
+                            <div>
+                                <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Global Piracy Overview</h1>
+                                <p style={{ color: '#aaa', marginBottom: '30px' }}>Real-time tracking of unauthorized sports media broadcasts</p>
+                                
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                                    
+                                    {/* Card 1: Total Scans */}
+                                    <div style={{ padding: '20px', border: '1px solid #444', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>TOTAL SCANS</h3>
+                                        <h2 style={{ color: 'cyan', fontSize: '32px', margin: '10px 0' }}>12,450</h2>
+                                    </div>
 
-      </div>
-    </div>
-  );
-}
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(<App />);
-</script>
-  </body>
+                                    {/* Card 2: Violations */}
+                                    <div style={{ padding: '20px', border: '1px solid #ff4444', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(255,68,68,0.05)' }}>
+                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>VIOLATIONS DETECTED</h3>
+                                        <h2 style={{ color: '#ff4444', fontSize: '32px', margin: '10px 0' }}>{violations}</h2>
+                                    </div>
+
+                                    {/* Card 3: Takedowns */}
+                                    <div style={{ padding: '20px', border: '1px solid #00ff00', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(0,255,0,0.05)' }}>
+                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>TAKEDOWNS SUCCESSFUL</h3>
+                                        <h2 style={{ color: '#00ff00', fontSize: '32px', margin: '10px 0' }}>128</h2>
+                                    </div>
+
+                                    {/* Card 4: Revenue */}
+                                    <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(0,255,255,0.05)' }}>
+                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>REVENUE SAVED</h3>
+                                        <h2 style={{ color: 'cyan', fontSize: '32px', margin: '10px 0' }}>$4.2M</h2>
+                                    </div>
+
+                                </div>
+
+                                <button 
+                                    onClick={() => alert("Deep scan initiated across 4,200 domains...")}
+                                    style={{ marginTop: '40px', padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    Force Global Scan
+                                </button>
+                            </div>
+                        )}
+
+                        {/* VIEW: SCANNER */}
+                        {view === 'Scanner' && (
+                            <div>
+                                <h1 style={{ fontSize: '32px' }}>AI Network Scanner</h1>
+                                <p style={{ color: '#00ff00' }}>● System Active: Monitoring global IP ranges...</p>
+                                <div style={{ background: '#111', padding: '25px', borderRadius: '8px', border: '1px solid #333', marginTop: '20px' }}>
+                                    <p style={{ color: 'cyan', fontFamily: 'monospace' }}>[10:05] Analyzing P2P Traffic...</p>
+                                    <p style={{ color: '#ff4444', fontFamily: 'monospace' }}>[10:06] ALERT: Mirror stream found on "ultra-hd-sports.net"</p>
+                                    <p style={{ color: 'white', fontFamily: 'monospace' }}>[10:07] Extracting metadata for takedown notice...</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VIEW: TRACKING */}
+                        {view === 'Tracking' && (
+                            <div>
+                                <h1 style={{ fontSize: '32px' }}>Asset Tracking</h1>
+                                <p style={{ color: '#aaa' }}>Digital fingerprinting and watermark verification</p>
+                                <div style={{ marginTop: '20px', padding: '20px', border: '1px dashed #555', borderRadius: '8px' }}>
+                                    <p>✓ Forensic Watermark: <strong>Active</strong> (Feed #8829)</p>
+                                    <p>✓ Global CDN Sync: <strong>Verified</strong></p>
+                                    <p>✓ Asset Integrity: <strong>100%</strong></p>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>
