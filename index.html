@@ -111,7 +111,6 @@
                                 </div>
                                 <div className="space-y-4 font-mono text-[11px]">
                                     <div className="flex justify-between py-3 border-b border-slate-800/50"><span className="text-slate-500">Nodes</span><span className="text-white">Active (14)</span></div>
-                                    <div className="flex justify-between py-3 border-b border-slate-800/50"><span className="text-slate-500">Neural Sync</span><span className="text-blue-400">8.4ms</span></div>
                                     <div className="flex justify-between py-3 border-b border-slate-800/50"><span className="text-slate-500">Accuracy</span><span className="text-blue-400">99.82%</span></div>
                                 </div>
                                 <button onClick={() => setShowReport(false)} className="w-full mt-10 py-4 bg-blue-600 text-white font-black rounded-xl text-[10px] uppercase tracking-widest">Close Diagnostic</button>
@@ -142,7 +141,7 @@
                     {/* MAIN CONTENT */}
                     <main className="flex-1 overflow-y-auto custom-scrollbar p-10">
                         
-                        {/* 1. OVERVIEW (Unchanged) */}
+                        {/* 1. OVERVIEW */}
                         {activeTab === 'Overview' && (
                             <div className="animate-in fade-in duration-500">
                                 <h2 className="text-2xl font-extrabold text-white tracking-tight">Operations Overview</h2>
@@ -169,14 +168,14 @@
                                         <div className="h-[200px]"><canvas id="trafficChart"></canvas></div>
                                     </div>
                                     <div onClick={() => setShowReport(true)} className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-2xl flex flex-col justify-between cursor-pointer hover:scale-[1.02] transition-all group relative overflow-hidden">
-                                        <div><p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-6">AI Efficiency</p><p className="text-5xl font-black text-white group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all">94%</p></div>
-                                        <button className="w-full py-3 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20">System Report</button>
+                                        <div><p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-6">AI Efficiency</p><p className="text-5xl font-black text-white">94%</p></div>
+                                        <button className="w-full py-3 bg-white/10 rounded-xl text-[10px] font-black uppercase border border-white/20">System Report</button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* 2. SCANNER (Unchanged) */}
+                        {/* 2. SCANNER */}
                         {activeTab === 'Scanner' && (
                             <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
                                 <h2 className="text-2xl font-extrabold text-white mb-8 tracking-tight">Stream Scanner</h2>
@@ -195,36 +194,50 @@
                                     </div>
                                 )}
                                 {scanStatus === 'result' && (
-                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-10 animate-in zoom-in-95 duration-300">
-                                        <p className="text-xs font-bold text-red-500 uppercase mb-4">Scan Result: Piracy Confirmed (Match 96%)</p>
-                                        <button className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[10px] uppercase">Initiate Automated Takedown</button>
+                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-10 animate-in zoom-in-95 duration-300 text-center">
+                                        <p className="text-xs font-black text-red-500 uppercase mb-4 tracking-widest">Match Found (96%) - Illegal Stream</p>
+                                        <button className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[10px] uppercase">Initiate Takedown</button>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* 3. APPS (New Full Implementation) */}
-                        {activeTab === 'Apps' && (
+                        {/* 3, 4, 5. APPS, PREDICTIONS, TRACKING (Summary Logic) */}
+                        {['Apps', 'Predictions', 'Tracking'].includes(activeTab) && (
                             <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-extrabold text-white mb-8 tracking-tight">Monitored Platforms</h2>
+                                <h2 className="text-2xl font-extrabold text-white mb-8 tracking-tight">{activeTab} Interface</h2>
                                 <div className="grid grid-cols-3 gap-6">
+                                    {[1,2,3].map(i => (
+                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 p-8 rounded-3xl opacity-60">
+                                            <div className="w-10 h-10 bg-blue-500/10 rounded-lg mb-4"></div>
+                                            <div className="h-4 w-2/3 bg-slate-800 rounded mb-2"></div>
+                                            <div className="h-3 w-full bg-slate-900 rounded"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 6. ASSETS (NEW) */}
+                        {activeTab === 'Assets' && (
+                            <div className="animate-in fade-in duration-500">
+                                <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Protected Asset Vault</h2>
+                                <p className="text-slate-500 text-sm mb-8">Registered fingerprints for authorized broadcasting media.</p>
+                                <div className="grid grid-cols-2 gap-6">
                                     {[
-                                        { name: 'Illegal IPTV', viewers: '419.4k', status: 'High Risk', icon: 'tv' },
-                                        { name: 'Telegram Channels', viewers: '184.6k', status: 'Moderate', icon: 'send' },
-                                        { name: 'TikTok Live', viewers: '94.4k', status: 'Emerging', icon: 'video' },
-                                        { name: 'Twitter (X)', viewers: '79.0k', status: 'Low Risk', icon: 'twitter' },
-                                        { name: 'Pirate Sites', viewers: '16.8k', status: 'Active', icon: 'globe' }
-                                    ].map((app, i) => (
-                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl hover:border-blue-500/40 transition-all">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <i data-lucide={app.icon} className="w-6 h-6 text-blue-500"></i>
-                                                <span className="flex items-center gap-1 text-[8px] font-black text-red-500 uppercase bg-red-500/10 px-2 py-1 rounded-full"><span className="w-1 h-1 bg-red-500 rounded-full pulse-red"></span> Live</span>
+                                        { n: 'UEFA Champions League 2026', id: 'FP_UEFA_001', st: 'Monitoring' },
+                                        { n: 'Premier League - Season 25/26', id: 'FP_EPL_992', st: 'Active' },
+                                        { n: 'Formula 1 - World Feed', id: 'FP_F1_412', st: 'Active' },
+                                        { n: 'NBA Playoffs - Global', id: 'FP_NBA_020', st: 'Monitoring' }
+                                    ].map((asset, i) => (
+                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl flex justify-between items-center group hover:border-blue-500/30 transition-all">
+                                            <div>
+                                                <h4 className="text-white font-bold text-sm">{asset.n}</h4>
+                                                <p className="text-[10px] text-blue-500 font-mono mt-1">{asset.id}</p>
                                             </div>
-                                            <h4 className="text-white font-bold mb-1">{app.name}</h4>
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-6 tracking-widest">{app.status}</p>
-                                            <div className="bg-[#050510] p-4 rounded-xl border border-slate-800/50 flex justify-between">
-                                                <span className="text-[9px] text-slate-500 font-bold uppercase">Live Viewers</span>
-                                                <span className="text-white font-mono text-xs">{app.viewers}</span>
+                                            <div className="text-right">
+                                                <span className="text-[8px] font-black bg-blue-500/10 text-blue-400 px-2 py-1 rounded-full uppercase">{asset.st}</span>
+                                                <p className="text-[9px] text-slate-500 mt-2 font-bold uppercase">Authorized</p>
                                             </div>
                                         </div>
                                     ))}
@@ -232,28 +245,27 @@
                             </div>
                         )}
 
-                        {/* 4. PREDICTIONS (New Full Implementation) */}
-                        {activeTab === 'Predictions' && (
+                        {/* 7. ENFORCEMENT (NEW) */}
+                        {activeTab === 'Enforcement' && (
                             <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Predictive Intelligence</h2>
-                                <p className="text-slate-500 text-sm mb-8">AI-driven forecasts for upcoming high-risk broadcasting events.</p>
+                                <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Enforcement Actions</h2>
+                                <p className="text-slate-500 text-sm mb-8">Legal and technical actions taken against confirmed piracy.</p>
                                 <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl overflow-hidden">
                                     <table className="w-full text-left">
-                                        <thead className="bg-[#050510] border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                            <tr><th className="p-6">Match / Event</th><th className="p-6">League</th><th className="p-6">Est. Piracy Viewers</th><th className="p-6 text-right">Risk Level</th></tr>
+                                        <thead className="bg-[#050510] border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                            <tr><th className="p-6">Target Platform</th><th className="p-6">Action</th><th className="p-6">Timestamp</th><th className="p-6 text-right">Status</th></tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-800/40 text-[12px]">
+                                        <tbody className="divide-y divide-slate-800/30 text-xs">
                                             {[
-                                                { m: 'Manchester United vs Liverpool', l: 'Premier League', v: '1.2M+', r: 'CRITICAL' },
-                                                { m: 'Real Madrid vs Barcelona', l: 'La Liga', v: '2.1M+', r: 'CRITICAL' },
-                                                { m: 'Lakers vs Celtics', l: 'NBA', v: '640k+', r: 'HIGH' },
-                                                { m: 'India vs Pakistan — T20', l: 'ICC World Cup', v: '4.5M+', r: 'CRITICAL' }
-                                            ].map((ev, i) => (
-                                                <tr key={i} className="hover:bg-slate-800/20">
-                                                    <td className="p-6 font-bold text-white">{ev.m}</td>
-                                                    <td className="p-6 text-slate-500">{ev.l}</td>
-                                                    <td className="p-6 text-red-500 font-bold">{ev.v}</td>
-                                                    <td className="p-6 text-right"><span className={`px-3 py-1 rounded-lg text-[9px] font-black ${ev.r==='CRITICAL' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-500'}`}>{ev.r}</span></td>
+                                                { t: 'vaughn.live/stream/442', a: 'DNS Block', time: '14:22:10', s: 'SUCCESS' },
+                                                { t: 'Telegram @FootyDirect', a: 'DMCA Takedown', time: '14:15:04', s: 'PENDING' },
+                                                { t: 'IPTV: 185.22.41.0', a: 'IP Null-Route', time: '13:50:22', s: 'SUCCESS' }
+                                            ].map((en, i) => (
+                                                <tr key={i} className="hover:bg-slate-800/10">
+                                                    <td className="p-6 font-mono text-blue-400">{en.t}</td>
+                                                    <td className="p-6 text-white font-bold">{en.a}</td>
+                                                    <td className="p-6 text-slate-500 font-mono">{en.time}</td>
+                                                    <td className="p-6 text-right font-black text-[10px] tracking-widest text-emerald-500">{en.s}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -262,48 +274,27 @@
                             </div>
                         )}
 
-                        {/* 5. TRACKING (New Full Implementation) */}
-                        {activeTab === 'Tracking' && (
-                            <div className="animate-in fade-in duration-500">
-                                <h2 className="text-2xl font-extrabold text-white mb-8 tracking-tight">Geospatial Tracking</h2>
-                                <div className="grid grid-cols-4 gap-6">
-                                    <div className="col-span-3 bg-[#0a0a1f] border border-slate-800 rounded-3xl p-6 h-[500px] relative overflow-hidden flex items-center justify-center">
-                                        <div className="absolute inset-0 opacity-20 pointer-events-none">
-                                            <div className="w-full h-full border border-blue-500/20 rounded-full animate-ping"></div>
-                                        </div>
-                                        <div className="text-center">
-                                            <i data-lucide="map-pin" className="w-12 h-12 text-blue-500 mx-auto mb-4 pulse-red"></i>
-                                            <p className="text-xs font-black uppercase text-slate-500 tracking-[0.3em]">Live Global Feed Active</p>
-                                        </div>
-                                        {/* Fake HUD Overlay */}
-                                        <div className="absolute top-6 left-6 font-mono text-[9px] text-blue-400 space-y-1">
-                                            <p>LAT: 28.6139° N</p><p>LONG: 77.2090° E</p>
-                                        </div>
+                        {/* 8. SETTINGS (NEW) */}
+                        {activeTab === 'Settings' && (
+                            <div className="animate-in fade-in duration-500 max-w-2xl">
+                                <h2 className="text-2xl font-extrabold text-white mb-8 tracking-tight">System Configuration</h2>
+                                <div className="space-y-4">
+                                    <div className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl flex items-center justify-between">
+                                        <div><p className="text-white font-bold text-xs">AI Auto-Takedown</p><p className="text-[10px] text-slate-500 mt-1">Automatically send DMCA on 95%+ fingerprint match.</p></div>
+                                        <div className="w-10 h-5 bg-blue-600 rounded-full relative shadow-[0_0_10px_rgba(37,99,235,0.4)]"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
                                     </div>
-                                    <div className="space-y-6">
-                                        <div className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl">
-                                            <h4 className="text-[10px] font-black text-slate-500 uppercase mb-4 tracking-widest">Active Hubs</h4>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between text-xs"><span className="text-white">South Asia</span><span className="text-red-500">47.2k</span></div>
-                                                <div className="flex justify-between text-xs"><span className="text-white">W. Europe</span><span className="text-red-500">31.0k</span></div>
-                                                <div className="flex justify-between text-xs"><span className="text-white">N. America</span><span className="text-blue-400">12.5k</span></div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-blue-600/10 border border-blue-500/20 p-6 rounded-2xl">
-                                            <p className="text-[10px] font-black text-blue-500 uppercase mb-2">System Alert</p>
-                                            <p className="text-xs text-white leading-relaxed font-medium">Anomaly detected in Madrid cluster. Stream relay identified.</p>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl flex items-center justify-between">
+                                        <div><p className="text-white font-bold text-xs">Geo-Clustering Engine</p><p className="text-[10px] text-slate-500 mt-1">Compute viewer density by region in real-time.</p></div>
+                                        <div className="w-10 h-5 bg-blue-600 rounded-full relative"><div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+                                    </div>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 p-6 rounded-2xl">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase mb-3">System API Key</p>
+                                        <div className="bg-[#050510] p-4 rounded-xl border border-slate-800 flex justify-between items-center font-mono text-[11px] text-blue-400">
+                                            <span>ssk_live_••••••••••••••••3a91</span>
+                                            <button className="text-[9px] font-black uppercase text-slate-500 border border-slate-800 px-3 py-1 rounded-lg hover:bg-slate-800">Copy</button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* FALLBACK TABS (Assets, Enforcement, Settings) */}
-                        {['Assets', 'Enforcement', 'Settings'].includes(activeTab) && (
-                            <div className="flex flex-col items-center justify-center h-[60vh] opacity-20">
-                                <i data-lucide="shield-off" className="w-16 h-16 mb-4"></i>
-                                <h3 className="text-xl font-black uppercase tracking-widest">{activeTab} Secure Module</h3>
-                                <p className="text-xs">Encryption Level: MIL-STD-2048</p>
                             </div>
                         )}
 
