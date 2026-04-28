@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Shield | Unified Mission Control</title>
+    <title>Sports Shield | Mission Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-[#050510] text-slate-200 font-sans overflow-x-hidden text-[11px]">
+<body class="bg-[#050510] text-slate-200 font-sans overflow-x-hidden text-[11px] selection:bg-blue-500/30">
     <div id="root"></div>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -18,22 +18,22 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Common Components ---
+        // --- Shared Components ---
         const StatCard = ({ title, value, change, icon, color }) => (
-            <div className="bg-[#0a0a1f] border border-slate-800 p-3 rounded-lg shadow-sm hover:border-blue-500 transition-all">
+            <div className="bg-[#0a0a1f] border border-slate-800 p-3 rounded-lg hover:border-blue-500/50 transition-all cursor-default">
                 <div className="flex justify-between items-start mb-2">
                     <div className={`p-1.5 rounded-md bg-opacity-10 ${color.bg}`}>
                         <i data-lucide={icon} className={`w-3.5 h-3.5 ${color.text}`}></i>
                     </div>
-                    <span className="text-[9px] font-bold text-blue-400 uppercase">{change}</span>
+                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-tighter">{change}</span>
                 </div>
-                <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-tighter">{title}</h3>
-                <p className="text-lg font-bold text-white mt-0.5">{value}</p>
+                <h3 className="text-slate-500 text-[9px] font-bold uppercase tracking-widest leading-none">{title}</h3>
+                <p className="text-lg font-bold text-white mt-1 leading-none">{value}</p>
             </div>
         );
 
         const PlatformCard = ({ name, type, description, incidents, viewers, share, icon }) => (
-            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5 hover:border-blue-500/50 transition-all group">
+            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5 hover:border-blue-500/30 transition-all group">
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-500/5 rounded-lg border border-blue-500/10">
@@ -41,7 +41,7 @@
                         </div>
                         <div>
                             <h3 className="text-sm font-bold text-white tracking-tight">{name}</h3>
-                            <span className="text-[9px] font-bold text-slate-500 uppercase bg-slate-800/50 px-1.5 py-0.5 rounded">{type}</span>
+                            <span className="text-[9px] font-bold text-slate-500 uppercase bg-slate-800/50 px-1.5 py-0.5 rounded tracking-tighter">{type}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -49,20 +49,18 @@
                         <span className="text-[9px] font-bold text-red-500 uppercase tracking-widest">Live</span>
                     </div>
                 </div>
-                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed h-8">{description}</p>
+                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed h-8 line-clamp-2">{description}</p>
                 <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
-                        <p className="text-white text-xs font-black">{incidents}</p>
-                        <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Incidents</p>
-                    </div>
-                    <div className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
-                        <p className="text-white text-xs font-black">{viewers}</p>
-                        <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Viewers</p>
-                    </div>
-                    <div className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
-                        <p className="text-white text-xs font-black">{share}</p>
-                        <p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Share</p>
-                    </div>
+                    {[
+                        { label: 'Incidents', val: incidents },
+                        { label: 'Viewers', val: viewers },
+                        { label: 'Share', val: share }
+                    ].map(stat => (
+                        <div key={stat.label} className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
+                            <p className="text-white text-xs font-black">{stat.val}</p>
+                            <p className="text-[8px] text-slate-500 uppercase font-bold mt-1 tracking-tighter">{stat.label}</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -76,9 +74,7 @@
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
                 if (view === 'Overview') renderCharts();
-                return () => {
-                    Object.values(chartInstances.current).forEach(chart => chart.destroy());
-                };
+                return () => Object.values(chartInstances.current).forEach(c => c.destroy());
             }, [view]);
 
             const renderCharts = () => {
@@ -90,7 +86,7 @@
                             labels: ['07:14', '09:14', '11:14', '13:14', '15:14', '17:14', '19:14', '21:14', '23:14', '01:14', '03:14', '05:14'],
                             datasets: [{
                                 data: [120, 110, 90, 70, 60, 55, 50, 45, 80, 100, 120, 110],
-                                borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4, pointRadius: 0
+                                borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
                             }]
                         },
                         options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } } } }
@@ -99,22 +95,27 @@
             };
 
             const handleScan = () => {
+                if(!url) return;
                 setScanStatus('scanning');
-                setTimeout(() => setScanStatus('completed'), 2000);
+                setTimeout(() => {
+                    setScanStatus('completed');
+                    setTimeout(() => window.lucide.createIcons(), 50);
+                }, 1800);
             };
 
             const predictions = [
                 { match: "Manchester United vs Liverpool", league: "Premier League", time: "30 mins", piracy: "1.2M+ viewers", conf: "0.94", level: "Critical", color: "bg-red-500" },
                 { match: "Real Madrid vs Barcelona — El Clásico", league: "La Liga", time: "2h 15m", piracy: "2.1M+ viewers", conf: "0.97", level: "Critical", color: "bg-red-500" },
                 { match: "Lakers vs Celtics", league: "NBA", time: "5h 40m", piracy: "640K+ viewers", conf: "0.88", level: "High", color: "bg-orange-500" },
-                { match: "India vs Pakistan — T20 World Cup", league: "ICC", time: "3d 09h", piracy: "4.5M+ viewers", conf: "0.99", level: "Critical", color: "bg-red-500" }
+                { match: "India vs Pakistan — T20 World Cup", league: "ICC", time: "3d 09h", piracy: "4.5M+ viewers", conf: "0.99", level: "Critical", color: "bg-red-500" },
+                { match: "Monaco Grand Prix — Final Practice", league: "Formula 1", time: "8h 02m", piracy: "410K+ viewers", conf: "0.82", level: "High", color: "bg-orange-500" }
             ];
 
             return (
                 <div className="flex h-screen w-full bg-[#050510] overflow-hidden">
-                    {/* Sidebar */}
+                    {/* Navigation Sidebar */}
                     <aside className="w-52 bg-[#03030b] border-r border-slate-800 p-4 flex flex-col shrink-0">
-                        <div className="flex items-center gap-2 text-blue-500 mb-8 px-2">
+                        <div className="flex items-center gap-2 text-blue-500 mb-10 px-2">
                             <i data-lucide="shield" className="w-6 h-6"></i>
                             <span className="text-base font-bold text-white tracking-tight uppercase">Sports Shield</span>
                         </div>
@@ -130,25 +131,25 @@
                                 { id: 'Enforcement', icon: 'gavel' },
                                 { id: 'Settings', icon: 'settings' }
                             ].map((item) => (
-                                <button key={item.id} onClick={() => setView(item.id)} className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-[11px] font-medium transition ${view === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:text-white hover:bg-slate-800/40'}`}>
+                                <button key={item.id} onClick={() => {setView(item.id); setScanStatus('idle'); setUrl('');}} className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-[11px] font-medium transition ${view === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:text-white hover:bg-slate-800/40'}`}>
                                     <i data-lucide={item.icon} className="w-3.5 h-3.5"></i> {item.id}
                                 </button>
                             ))}
                         </nav>
                     </aside>
 
-                    {/* Main Content Area */}
-                    <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-                        <header className="mb-6">
-                            <h2 className="text-xl font-bold text-white tracking-tight">
+                    {/* Content Space */}
+                    <main className="flex-1 overflow-y-auto p-8">
+                        <header className="mb-8">
+                            <h2 className="text-2xl font-bold text-white tracking-tight">
                                 {view === 'Predictions' ? 'Predictive Intelligence' : view === 'Apps' ? 'Monitored Platforms' : view === 'Scanner' ? 'Stream Scanner' : 'Operations Overview'}
                             </h2>
-                            <p className="text-slate-500 text-[10px]">
-                                {view === 'Predictions' ? 'AI-driven forecasts for upcoming high-risk broadcasting events.' : 'Real-time piracy intelligence and enforcement metrics.'}
+                            <p className="text-slate-500 text-[11px] mt-0.5">
+                                {view === 'Predictions' ? 'AI-driven forecasts for upcoming high-risk broadcasting events.' : 'Real-time piracy intelligence and global enforcement metrics.'}
                             </p>
                         </header>
 
-                        {/* VIEW: OVERVIEW */}
+                        {/* OVERVIEW SCREEN */}
                         {view === 'Overview' && (
                             <div className="space-y-4 animate-in fade-in duration-500">
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -161,19 +162,17 @@
                                 </div>
                                 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                    <div className="lg:col-span-2 bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
-                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-4 tracking-widest">24h Piracy Traffic</h4>
-                                        <div className="h-[180px] w-full">
-                                            <canvas id="trafficChart"></canvas>
-                                        </div>
+                                    <div className="lg:col-span-2 bg-[#0a0a1f] border border-slate-800 rounded-xl p-5">
+                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-5 tracking-widest">24h Piracy Traffic</h4>
+                                        <div className="h-[180px] w-full"><canvas id="trafficChart"></canvas></div>
                                     </div>
-                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
-                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-3 tracking-widest">High-Risk Upcoming</h4>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5">
+                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-4 tracking-widest">High-Risk Upcoming</h4>
                                         <div className="space-y-2">
                                             {['Manchester United vs Liverpool', 'Real Madrid vs Barcelona'].map(match => (
-                                                <div key={match} className="p-3 bg-[#050510] rounded-lg border border-slate-800 flex justify-between items-center hover:border-blue-500/50">
+                                                <div key={match} className="p-3 bg-[#050510] rounded-lg border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-blue-500/50">
                                                     <span className="text-[10px] text-white font-medium">{match}</span>
-                                                    <span className="text-red-500 text-[8px] font-bold px-1.5 py-0.5 bg-red-500/10 rounded uppercase">Critical</span>
+                                                    <span className="text-red-500 text-[8px] font-black px-1.5 py-0.5 bg-red-500/10 rounded uppercase tracking-tighter">Critical</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -182,25 +181,27 @@
                             </div>
                         )}
 
-                        {/* VIEW: SCANNER */}
+                        {/* SCANNER SCREEN */}
                         {view === 'Scanner' && (
-                            <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-500">
-                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-8">
+                            <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300">
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-10">
                                     <h3 className="text-xs font-bold text-white uppercase mb-4 flex items-center gap-2">
                                         <i data-lucide="zap" className="w-3.5 h-3.5 text-blue-500"></i> Live Probe
                                     </h3>
                                     <div className="flex gap-2">
                                         <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="e.g. https://www.bing.com/..." className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-2.5 text-[11px] font-mono text-blue-400 focus:outline-none focus:border-blue-500" />
-                                        <button onClick={handleScan} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs">Run Scan</button>
+                                        <button onClick={handleScan} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition-colors">Run Scan</button>
                                     </div>
                                 </div>
                                 {scanStatus === 'completed' && (
-                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5 animate-in slide-in-from-bottom-2">
-                                        <div className="flex justify-between items-center mb-4"><h4 className="text-xs font-bold uppercase tracking-widest">Scan Report</h4><span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-500/20 uppercase">Suspicious</span></div>
-                                        <div className="bg-[#050510] p-4 rounded-lg mb-4 text-center border border-slate-800/50"><p className="text-slate-500 text-[9px] uppercase font-bold mb-1">Risk Score</p><p className="text-3xl font-black text-blue-400">95/100</p></div>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            {['Fingerprint: 0x0023C2E7', 'Region: South Asia', 'Viewers: 78,085', 'Protocol: DASH'].map((txt, i) => (
-                                                <div key={i} className="p-3 bg-slate-900/40 rounded-lg border border-slate-800 text-[10px] text-white font-medium text-center">{txt}</div>
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 animate-in zoom-in-95 duration-300">
+                                        <div className="flex justify-between items-center mb-6"><h4 className="text-[10px] font-bold text-white uppercase tracking-widest">Scan Result Summary</h4><span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-500/20 uppercase tracking-widest">Suspicious</span></div>
+                                        <div className="grid grid-cols-4 gap-4">
+                                            {[{l:'Score', v:'95/100', c:'text-blue-400'}, {l:'Region', v:'South Asia', c:'text-white'}, {l:'Viewers', v:'78,085', c:'text-white'}, {l:'ID', v:'0x23C2E7', c:'text-white font-mono'}].map((s,i)=>(
+                                                <div key={i} className="p-4 bg-[#050510] rounded-lg border border-slate-800/50 text-center">
+                                                    <p className="text-slate-500 text-[8px] uppercase font-bold mb-1 tracking-widest">{s.l}</p>
+                                                    <p className={`text-lg font-black ${s.c}`}>{s.v}</p>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
@@ -208,41 +209,40 @@
                             </div>
                         )}
 
-                        {/* VIEW: APPS */}
+                        {/* APPS SCREEN */}
                         {view === 'Apps' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-500">
                                 <PlatformCard name="Illegal IPTV" type="IPTV App" description="Standalone apps streaming pirated channel bundles." incidents="2" viewers="419.4k" share="17%" icon="tv" />
                                 <PlatformCard name="TikTok" type="Web" description="Generic web players hosted on bulletproof infra." incidents="1" viewers="184.6k" share="8%" icon="globe" />
                                 <PlatformCard name="Telegram" type="Messaging" description="Private channels redistributing live HD streams." incidents="2" viewers="79.0k" share="17%" icon="send" />
                                 <PlatformCard name="YouTube" type="Video" description="Restream channels masquerading as fan content." incidents="1" viewers="57.8k" share="8%" icon="youtube" />
-                                <PlatformCard name="Twitch" type="Web" description="Generic web players hosted on bulletproof infra." incidents="1" viewers="22.4k" share="8%" icon="globe" />
                             </div>
                         )}
 
-                        {/* VIEW: PREDICTIONS */}
+                        {/* PREDICTIONS SCREEN */}
                         {view === 'Predictions' && (
-                            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl overflow-hidden animate-in fade-in duration-500">
-                                <div className="p-4 border-b border-slate-800"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Forecasted Risk Events</h4></div>
-                                <table className="w-full text-left text-[10px]">
+                            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl overflow-hidden animate-in fade-in duration-500 shadow-2xl">
+                                <div className="p-5 border-b border-slate-800 bg-[#0c0c28]/30"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Forecasted Risk Events</h4></div>
+                                <table className="w-full text-left text-[11px]">
                                     <thead className="bg-[#050510] text-slate-500 uppercase font-bold border-b border-slate-800">
                                         <tr>
-                                            <th className="px-4 py-3">Match / Event</th>
-                                            <th className="px-4 py-3">League</th>
-                                            <th className="px-4 py-3">Time</th>
-                                            <th className="px-4 py-3">Est. Piracy</th>
-                                            <th className="px-4 py-3">Conf.</th>
-                                            <th className="px-4 py-3">Level</th>
+                                            <th className="px-6 py-4">Match / Event</th>
+                                            <th className="px-6 py-4">League</th>
+                                            <th className="px-6 py-4">Time</th>
+                                            <th className="px-6 py-4">Est. Piracy</th>
+                                            <th className="px-6 py-4">Conf.</th>
+                                            <th className="px-6 py-4 text-right">Risk Level</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-800/50">
                                         {predictions.map((p, i) => (
-                                            <tr key={i} className="hover:bg-slate-800/20">
-                                                <td className="px-4 py-3 font-bold text-white">{p.match}</td>
-                                                <td className="px-4 py-3 text-slate-400">{p.league}</td>
-                                                <td className="px-4 py-3 text-slate-400">{p.time}</td>
-                                                <td className="px-4 py-3 text-red-400 font-bold">{p.piracy}</td>
-                                                <td className="px-4 py-3 text-blue-400 font-mono">{p.conf}</td>
-                                                <td className="px-4 py-3"><span className={`${p.color} text-white px-2 py-0.5 rounded text-[8px] font-black uppercase`}>{p.level}</span></td>
+                                            <tr key={i} className="hover:bg-slate-800/20 transition-colors">
+                                                <td className="px-6 py-4 font-bold text-white">{p.match}</td>
+                                                <td className="px-6 py-4 text-slate-400">{p.league}</td>
+                                                <td className="px-6 py-4 text-slate-400">{p.time}</td>
+                                                <td className="px-6 py-4 text-red-400 font-bold">{p.piracy}</td>
+                                                <td className="px-6 py-4 text-blue-400 font-mono text-[10px]">{p.conf}</td>
+                                                <td className="px-6 py-4 text-right"><span className={`${p.color} text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter`}>{p.level}</span></td>
                                             </tr>
                                         ))}
                                     </tbody>
