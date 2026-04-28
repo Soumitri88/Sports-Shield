@@ -6,7 +6,52 @@
     <title>Sports Shield</title>
   </head>
   <body>
-   <div id="root"></div>
-<script type="module" src="/src/hello.tsx"></script>
+  <div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  function App() {
+    const [view, setView] = useState('Overview');
+    const [violations, setViolations] = useState(351);
+
+    return (
+      <div style={{ display: 'flex', backgroundColor: '#000033', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+        {/* Sidebar */}
+        <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px' }}>
+          <h2>Sports Shield</h2>
+          <p onClick={() => setView('Overview')} style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : 'white' }}>• Overview</p>
+          <p onClick={() => setView('Scanner')} style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : 'white' }}>• Scanner</p>
+        </div>
+
+        {/* Main Content */}
+        <div style={{ flex: 1, padding: '40px' }}>
+          {view === 'Overview' ? (
+            <div>
+              <h1>Global Piracy Overview</h1>
+              <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '8px', width: '200px' }}>
+                <h3>VIOLATIONS</h3>
+                <h2 style={{ color: '#ff4444' }}>{violations}</h2>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <h1>AI Network Scanner</h1>
+              <p>Scanning active streams...</p>
+              <div style={{ color: '#00ff00' }}>[SAFE] YouTube Official Feed</div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
+</script>
   </body>
 </html>
