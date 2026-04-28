@@ -11,22 +11,20 @@
 <body class="bg-[#050510] text-slate-200 font-sans overflow-hidden">
     <div id="root"></div>
 
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
-        const StatCard = ({ title, value, change, icon: Icon, color }) => (
+        const StatCard = ({ title, value, change, iconName, colorClass }) => (
             <div className="bg-[#0a0a1f] border border-slate-800 p-5 rounded-xl hover:border-blue-500 transition-all">
                 <div className="flex justify-between items-start mb-4">
-                    <div className={`p-2 rounded-lg bg-opacity-10 ${color.bg}`}>
-                        <Icon size={20} className={color.text} />
+                    <div className={`p-2 rounded-lg bg-opacity-10 ${colorClass.bg}`}>
+                        <i data-lucide={iconName} className={colorClass.text}></i>
                     </div>
-                    <span className={`text-xs font-medium ${change.startsWith('+') ? 'text-blue-400' : 'text-red-400'}`}>
-                        {change} from yesterday
-                    </span>
+                    <span className="text-xs font-medium text-blue-400">{change}</span>
                 </div>
                 <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider">{title}</h3>
                 <p className="text-3xl font-bold mt-1 text-white">{value}</p>
@@ -35,101 +33,75 @@
 
         function App() {
             const [view, setView] = useState('Overview');
-            const chartRef = useRef(null);
 
-            // Initialize Chart.js
             useEffect(() => {
+                // Initialize icons every time the view changes
+                if (window.lucide) window.lucide.createIcons();
+                
                 if (view === 'Overview') {
                     const ctx = document.getElementById('piracyChart')?.getContext('2d');
                     if (ctx) {
                         new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: ['06:57', '08:57', '10:57', '12:57', '14:57', '16:57', '18:57'],
+                                labels: ['06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '00:00'],
                                 datasets: [{
-                                    label: 'Estimated Viewers',
-                                    data: [80, 82, 60, 45, 55, 120, 90],
+                                    data: [65, 59, 80, 81, 56, 95, 130],
                                     borderColor: '#3b82f6',
-                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    tension: 0.4,
                                     fill: true,
-                                    tension: 0.4
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
                                 }]
                             },
-                            options: { 
-                                responsive: true, 
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: { y: { display: false }, x: { grid: { display: false } } }
-                            }
+                            options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
                         });
                     }
                 }
-                lucide.createIcons();
             }, [view]);
-
-            const navItems = [
-                { id: 'Overview', icon: 'layout-dashboard', label: 'Overview' },
-                { id: 'Scanner', icon: 'search', label: 'Scanner' },
-                { id: 'Tracking', icon: 'crosshair', label: 'Tracking' },
-                { id: 'Enforcement', icon: 'shield-alert', label: 'Enforcement' },
-            ];
 
             return (
                 <div className="flex h-screen w-full">
-                    {/* SIDEBAR */}
-                    <aside className="w-64 bg-[#03030b] border-r border-slate-800 flex flex-col p-6">
+                    {/* Sidebar */}
+                    <aside className="w-64 bg-[#03030b] border-r border-slate-800 p-6 flex flex-col">
                         <div className="flex items-center gap-3 mb-10">
-                            <div className="bg-blue-600 p-1.5 rounded-lg">
-                                <i data-lucide="shield-check" className="text-white w-6 h-6"></i>
-                            </div>
-                            <h1 className="text-xl font-bold tracking-tight text-white">Sports Shield</h1>
+                            <div className="bg-blue-600 p-1.5 rounded-lg"><i data-lucide="shield" className="text-white"></i></div>
+                            <h1 className="text-xl font-bold text-white">Sports Shield</h1>
                         </div>
-                        
-                        <nav className="space-y-2 flex-1">
-                            {navItems.map(item => (
-                                <button 
-                                    key={item.id}
-                                    onClick={() => setView(item.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                                        view === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                    }`}
-                                >
-                                    <i data-lucide={item.icon} className="w-4 h-4"></i>
-                                    {item.label}
+                        <nav className="space-y-2">
+                            {['Overview', 'Scanner', 'Tracking'].map((item) => (
+                                <button key={item} onClick={() => setView(item)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm ${view === item ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}>
+                                    <i data-lucide={item === 'Overview' ? 'layout' : item === 'Scanner' ? 'search' : 'target'} className="w-4 h-4"></i>
+                                    {item}
                                 </button>
                             ))}
                         </nav>
                     </aside>
 
-                    {/* MAIN CONTENT */}
-                    <main className="flex-1 overflow-y-auto p-8 lg:p-12">
+                    {/* Content */}
+                    <main className="flex-1 p-10 overflow-y-auto">
                         <header className="mb-10">
-                            <h2 className="text-3xl font-bold text-white mb-2">{view} Dashboard</h2>
-                            <p className="text-slate-400">Real-time piracy intelligence and enforcement metrics.</p>
+                            <h2 className="text-3xl font-bold text-white">{view} Control</h2>
+                            <p className="text-slate-400">Real-time piracy intelligence and enforcement.</p>
                         </header>
 
                         {view === 'Overview' && (
                             <div className="space-y-8">
-                                {/* STATS GRID */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    <StatCard title="Active Incidents" value="11" change="+12%" icon={lucide.Activity} color={{bg: 'bg-blue-500', text: 'text-blue-500'}} />
-                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" icon={lucide.EyeOff} color={{bg: 'bg-cyan-500', text: 'text-cyan-500'}} />
-                                    <StatCard title="Takedowns Today" value="5" change="+2%" icon={lucide.Hammer} color={{bg: 'bg-purple-500', text: 'text-purple-500'}} />
-                                    <StatCard title="Revenue Saved" value="$4.82M" change="+18%" icon={lucide.DollarSign} color={{bg: 'bg-emerald-500', text: 'text-emerald-500'}} />
+                                    <StatCard title="Active Incidents" value="11" change="+12%" iconName="activity" colorClass={{bg:'bg-blue-500', text:'text-blue-500'}} />
+                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" iconName="eye-off" colorClass={{bg:'bg-cyan-500', text:'text-cyan-500'}} />
+                                    <StatCard title="Takedowns" value="5" change="+2%" iconName="gavel" colorClass={{bg:'bg-purple-500', text:'text-purple-500'}} />
+                                    <StatCard title="Revenue Saved" value="$4.82M" change="+18%" iconName="dollar-sign" colorClass={{bg:'bg-emerald-500', text:'text-emerald-500'}} />
                                 </div>
-
-                                {/* CHART AREA */}
                                 <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 h-80">
-                                    <h4 className="text-slate-400 uppercase text-xs font-bold tracking-widest mb-6">24h Piracy Traffic</h4>
                                     <canvas id="piracyChart"></canvas>
                                 </div>
                             </div>
                         )}
-
+                        
                         {view !== 'Overview' && (
-                            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-2xl">
-                                <i data-lucide="loader" className="w-8 h-8 text-blue-500 animate-spin mb-4"></i>
-                                <p className="text-slate-500 italic">Initializing AI module for {view}...</p>
+                            <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-800 rounded-2xl text-slate-500">
+                                <i data-lucide="refresh-cw" className="animate-spin mb-4"></i>
+                                <p>Syncing {view} data from global nodes...</p>
                             </div>
                         )}
                     </main>
