@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Shield Dashboard</title>
+    <title>Sports Shield | Mission Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body style="margin: 0; padding: 0; background-color: #000033;">
+<body class="bg-[#050510] text-slate-200 font-sans overflow-hidden">
     <div id="root"></div>
 
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -13,122 +16,123 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
+
+        const StatCard = ({ title, value, change, icon: Icon, color }) => (
+            <div className="bg-[#0a0a1f] border border-slate-800 p-5 rounded-xl hover:border-blue-500 transition-all">
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`p-2 rounded-lg bg-opacity-10 ${color.bg}`}>
+                        <Icon size={20} className={color.text} />
+                    </div>
+                    <span className={`text-xs font-medium ${change.startsWith('+') ? 'text-blue-400' : 'text-red-400'}`}>
+                        {change} from yesterday
+                    </span>
+                </div>
+                <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider">{title}</h3>
+                <p className="text-3xl font-bold mt-1 text-white">{value}</p>
+            </div>
+        );
 
         function App() {
             const [view, setView] = useState('Overview');
-            const [violations, setViolations] = useState(351);
+            const chartRef = useRef(null);
 
-            // Simple timer to make violations increase slightly over time
+            // Initialize Chart.js
             useEffect(() => {
-                const timer = setInterval(() => {
-                    setViolations(prev => prev + Math.floor(Math.random() * 2));
-                }, 5000);
-                return () => clearInterval(timer);
-            }, []);
+                if (view === 'Overview') {
+                    const ctx = document.getElementById('piracyChart')?.getContext('2d');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['06:57', '08:57', '10:57', '12:57', '14:57', '16:57', '18:57'],
+                                datasets: [{
+                                    label: 'Estimated Viewers',
+                                    data: [80, 82, 60, 45, 55, 120, 90],
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    fill: true,
+                                    tension: 0.4
+                                }]
+                            },
+                            options: { 
+                                responsive: true, 
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { display: false }, x: { grid: { display: false } } }
+                            }
+                        });
+                    }
+                }
+                lucide.createIcons();
+            }, [view]);
+
+            const navItems = [
+                { id: 'Overview', icon: 'layout-dashboard', label: 'Overview' },
+                { id: 'Scanner', icon: 'search', label: 'Scanner' },
+                { id: 'Tracking', icon: 'crosshair', label: 'Tracking' },
+                { id: 'Enforcement', icon: 'shield-alert', label: 'Enforcement' },
+            ];
 
             return (
-                <div style={{ display: 'flex', color: 'white', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-                    
-                    {/* 1. SIDEBAR */}
-                    <div style={{ width: '220px', borderRight: '1px solid #444', padding: '30px 20px', backgroundColor: '#000022' }}>
-                        <h2 style={{ color: 'cyan', fontSize: '24px', marginBottom: '40px' }}>Sports Shield</h2>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <p 
-                                onClick={() => setView('Overview')} 
-                                style={{ cursor: 'pointer', color: view === 'Overview' ? 'cyan' : '#aaa', fontWeight: view === 'Overview' ? 'bold' : 'normal', margin: 0 }}
-                            >
-                                • Overview
-                            </p>
-                            <p 
-                                onClick={() => setView('Scanner')} 
-                                style={{ cursor: 'pointer', color: view === 'Scanner' ? 'cyan' : '#aaa', fontWeight: view === 'Scanner' ? 'bold' : 'normal', margin: 0 }}
-                            >
-                                • Scanner
-                            </p>
-                            <p 
-                                onClick={() => setView('Tracking')} 
-                                style={{ cursor: 'pointer', color: view === 'Tracking' ? 'cyan' : '#aaa', fontWeight: view === 'Tracking' ? 'bold' : 'normal', margin: 0 }}
-                            >
-                                • Tracking
-                            </p>
+                <div className="flex h-screen w-full">
+                    {/* SIDEBAR */}
+                    <aside className="w-64 bg-[#03030b] border-r border-slate-800 flex flex-col p-6">
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="bg-blue-600 p-1.5 rounded-lg">
+                                <i data-lucide="shield-check" className="text-white w-6 h-6"></i>
+                            </div>
+                            <h1 className="text-xl font-bold tracking-tight text-white">Sports Shield</h1>
                         </div>
-                    </div>
-
-                    {/* 2. MAIN CONTENT AREA */}
-                    <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
                         
-                        {/* VIEW: OVERVIEW */}
-                        {view === 'Overview' && (
-                            <div>
-                                <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>Global Piracy Overview</h1>
-                                <p style={{ color: '#aaa', marginBottom: '30px' }}>Real-time tracking of unauthorized sports media broadcasts</p>
-                                
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                                    
-                                    {/* Card 1: Total Scans */}
-                                    <div style={{ padding: '20px', border: '1px solid #444', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>TOTAL SCANS</h3>
-                                        <h2 style={{ color: 'cyan', fontSize: '32px', margin: '10px 0' }}>12,450</h2>
-                                    </div>
-
-                                    {/* Card 2: Violations */}
-                                    <div style={{ padding: '20px', border: '1px solid #ff4444', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(255,68,68,0.05)' }}>
-                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>VIOLATIONS DETECTED</h3>
-                                        <h2 style={{ color: '#ff4444', fontSize: '32px', margin: '10px 0' }}>{violations}</h2>
-                                    </div>
-
-                                    {/* Card 3: Takedowns */}
-                                    <div style={{ padding: '20px', border: '1px solid #00ff00', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(0,255,0,0.05)' }}>
-                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>TAKEDOWNS SUCCESSFUL</h3>
-                                        <h2 style={{ color: '#00ff00', fontSize: '32px', margin: '10px 0' }}>128</h2>
-                                    </div>
-
-                                    {/* Card 4: Revenue */}
-                                    <div style={{ padding: '20px', border: '1px solid cyan', borderRadius: '12px', width: '220px', backgroundColor: 'rgba(0,255,255,0.05)' }}>
-                                        <h3 style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>REVENUE SAVED</h3>
-                                        <h2 style={{ color: 'cyan', fontSize: '32px', margin: '10px 0' }}>$4.2M</h2>
-                                    </div>
-
-                                </div>
-
+                        <nav className="space-y-2 flex-1">
+                            {navItems.map(item => (
                                 <button 
-                                    onClick={() => alert("Deep scan initiated across 4,200 domains...")}
-                                    style={{ marginTop: '40px', padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                                    key={item.id}
+                                    onClick={() => setView(item.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                                        view === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                    }`}
                                 >
-                                    Force Global Scan
+                                    <i data-lucide={item.icon} className="w-4 h-4"></i>
+                                    {item.label}
                                 </button>
-                            </div>
-                        )}
+                            ))}
+                        </nav>
+                    </aside>
 
-                        {/* VIEW: SCANNER */}
-                        {view === 'Scanner' && (
-                            <div>
-                                <h1 style={{ fontSize: '32px' }}>AI Network Scanner</h1>
-                                <p style={{ color: '#00ff00' }}>● System Active: Monitoring global IP ranges...</p>
-                                <div style={{ background: '#111', padding: '25px', borderRadius: '8px', border: '1px solid #333', marginTop: '20px' }}>
-                                    <p style={{ color: 'cyan', fontFamily: 'monospace' }}>[10:05] Analyzing P2P Traffic...</p>
-                                    <p style={{ color: '#ff4444', fontFamily: 'monospace' }}>[10:06] ALERT: Mirror stream found on "ultra-hd-sports.net"</p>
-                                    <p style={{ color: 'white', fontFamily: 'monospace' }}>[10:07] Extracting metadata for takedown notice...</p>
+                    {/* MAIN CONTENT */}
+                    <main className="flex-1 overflow-y-auto p-8 lg:p-12">
+                        <header className="mb-10">
+                            <h2 className="text-3xl font-bold text-white mb-2">{view} Dashboard</h2>
+                            <p className="text-slate-400">Real-time piracy intelligence and enforcement metrics.</p>
+                        </header>
+
+                        {view === 'Overview' && (
+                            <div className="space-y-8">
+                                {/* STATS GRID */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <StatCard title="Active Incidents" value="11" change="+12%" icon={lucide.Activity} color={{bg: 'bg-blue-500', text: 'text-blue-500'}} />
+                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" icon={lucide.EyeOff} color={{bg: 'bg-cyan-500', text: 'text-cyan-500'}} />
+                                    <StatCard title="Takedowns Today" value="5" change="+2%" icon={lucide.Hammer} color={{bg: 'bg-purple-500', text: 'text-purple-500'}} />
+                                    <StatCard title="Revenue Saved" value="$4.82M" change="+18%" icon={lucide.DollarSign} color={{bg: 'bg-emerald-500', text: 'text-emerald-500'}} />
+                                </div>
+
+                                {/* CHART AREA */}
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 h-80">
+                                    <h4 className="text-slate-400 uppercase text-xs font-bold tracking-widest mb-6">24h Piracy Traffic</h4>
+                                    <canvas id="piracyChart"></canvas>
                                 </div>
                             </div>
                         )}
 
-                        {/* VIEW: TRACKING */}
-                        {view === 'Tracking' && (
-                            <div>
-                                <h1 style={{ fontSize: '32px' }}>Asset Tracking</h1>
-                                <p style={{ color: '#aaa' }}>Digital fingerprinting and watermark verification</p>
-                                <div style={{ marginTop: '20px', padding: '20px', border: '1px dashed #555', borderRadius: '8px' }}>
-                                    <p>✓ Forensic Watermark: <strong>Active</strong> (Feed #8829)</p>
-                                    <p>✓ Global CDN Sync: <strong>Verified</strong></p>
-                                    <p>✓ Asset Integrity: <strong>100%</strong></p>
-                                </div>
+                        {view !== 'Overview' && (
+                            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                <i data-lucide="loader" className="w-8 h-8 text-blue-500 animate-spin mb-4"></i>
+                                <p className="text-slate-500 italic">Initializing AI module for {view}...</p>
                             </div>
                         )}
-
-                    </div>
+                    </main>
                 </div>
             );
         }
