@@ -174,7 +174,125 @@
                                     </div>
                                 )}
                             </div>
-                        )}
+                        )}{view === 'Scanner' && (
+    <div className="max-w-5xl mx-auto space-y-6">
+        {/* Live Probe Input Box */}
+        <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-8">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-500 bg-opacity-10 rounded-lg">
+                    <i data-lucide="target" className="text-blue-500 w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-tight">Live Probe</h3>
+                    <p className="text-[10px] text-slate-500">Paste any stream URL, telegram handle, or social link.</p>
+                </div>
+            </div>
+
+            <div className="flex gap-2 mb-6">
+                <input 
+                    type="text" 
+                    id="probeInput"
+                    placeholder="e.g. https://www.bing.com/..." 
+                    className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-mono"
+                />
+                <button 
+                    onClick={() => {
+                        setIsScanning(true);
+                        // Simulate the pipeline sequence
+                        setTimeout(() => setIsScanning(false), 2000); 
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2 text-[11px]"
+                >
+                    <i data-lucide="scan-eye" className="w-4 h-4"></i> Run Scan
+                </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mr-2">Try:</span>
+                {['t.me/+RedDevilsHD-EPL', 'iptv-cricstream.app/channel/star-sports-1'].map((tag) => (
+                    <button key={tag} className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-md text-[9px] text-slate-400 hover:text-white transition">
+                        {tag}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* Probe Pipeline (Shows while scanning or after scan) */}
+        {(isScanning || (!isScanning && document.getElementById('probeInput')?.value)) && (
+            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 space-y-4">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Probe Pipeline</h4>
+                <div className="space-y-4">
+                    {[
+                        { label: 'Resolving target endpoint', detail: 'Endpoint resolved • 3 hops', icon: 'shield-check' },
+                        { label: 'Probing media stream signature', detail: 'H.264 1080p • 60fps • 6 Mbps', icon: 'radio' },
+                        { label: 'Comparing against fingerprint vault', detail: 'Match: UEFA Champions League Final 2026', icon: 'fingerprint' },
+                        { label: 'Geo-tagging viewer cluster', detail: 'Cluster: South Asia • 47.2K concurrent', icon: 'map-pin' },
+                        { label: 'Computing risk score', detail: 'Confidence 0.94', icon: 'cpu' }
+                    ].map((step, i) => (
+                        <div key={i} className={`flex items-start gap-3 ${isScanning ? 'animate-pulse' : ''}`}>
+                            <i data-lucide={step.icon} className="w-4 h-4 text-blue-500 mt-0.5"></i>
+                            <div>
+                                <p className="text-[11px] font-bold text-white">{step.label}</p>
+                                <p className="text-[10px] text-slate-500">{step.detail}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+
+        {/* Scan Report (Only shows after scan completes) */}
+        {!isScanning && document.getElementById('probeInput')?.value && (
+            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-2">
+                        <i data-lucide="alert-triangle" className="w-4 h-4 text-yellow-500"></i>
+                        <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Scan Report</h4>
+                    </div>
+                    <span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded uppercase">Suspicious</span>
+                </div>
+                
+                <p className="text-[9px] text-slate-500 mb-6 truncate font-mono bg-black/30 p-2 rounded border border-slate-800">
+                    {document.getElementById('probeInput').value}
+                </p>
+
+                <div className="mb-6">
+                    <div className="flex justify-between text-[10px] mb-2">
+                        <span className="text-slate-400">Risk Score</span>
+                        <span className="text-white font-bold">95/100</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-600 h-full w-[95%]"></div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+                        <p className="text-[9px] text-slate-500 uppercase mb-1">Fingerprint</p>
+                        <p className="text-[11px] text-white font-mono">0x0023C2E7</p>
+                    </div>
+                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+                        <p className="text-[9px] text-slate-500 uppercase mb-1">Region</p>
+                        <p className="text-[11px] text-white">South Asia</p>
+                    </div>
+                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+                        <p className="text-[9px] text-slate-500 uppercase mb-1">Est. Viewers</p>
+                        <p className="text-[11px] text-white font-bold">78,085</p>
+                    </div>
+                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+                        <p className="text-[9px] text-slate-500 uppercase mb-1">Protocol</p>
+                        <p className="text-[11px] text-white">DASH</p>
+                    </div>
+                </div>
+
+                <div className="p-4 bg-blue-600/5 border border-blue-600/20 rounded-lg">
+                    <p className="text-[9px] text-slate-500 uppercase mb-1">Matched Protected Asset</p>
+                    <p className="text-[12px] text-white font-bold uppercase tracking-tight">UEFA Champions League Final 2026</p>
+                </div>
+            </div>
+        )}
+    </div>
+)}
 
                         {/* Other Pages Placeholder */}
                         {!['Overview', 'Scanner'].includes(view) && (
