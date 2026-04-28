@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Shield | Mission Control</title>
+    <title>Sports Shield | Anti-Piracy Command</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #050510; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-[#050510] text-slate-200 font-sans overflow-x-hidden text-[11px] selection:bg-blue-500/30">
+<body class="bg-[#050510] text-slate-300 text-[13px] selection:bg-blue-500/30 overflow-hidden">
     <div id="root"></div>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -18,241 +25,432 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Shared Components ---
-        const StatCard = ({ title, value, change, icon, color }) => (
-            <div className="bg-[#0a0a1f] border border-slate-800 p-3 rounded-lg hover:border-blue-500/50 transition-all cursor-default">
-                <div className="flex justify-between items-start mb-2">
-                    <div className={`p-1.5 rounded-md bg-opacity-10 ${color.bg}`}>
-                        <i data-lucide={icon} className={`w-3.5 h-3.5 ${color.text}`}></i>
-                    </div>
-                    <span className="text-[9px] font-bold text-blue-400 uppercase tracking-tighter">{change}</span>
-                </div>
-                <h3 className="text-slate-500 text-[9px] font-bold uppercase tracking-widest leading-none">{title}</h3>
-                <p className="text-lg font-bold text-white mt-1 leading-none">{value}</p>
+        // --- Shared UI Components ---
+        const SidebarItem = ({ id, icon, label, active, onClick }) => (
+            <button 
+                onClick={() => onClick(id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                    active ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800/40'
+                }`}
+            >
+                <i data-lucide={icon} className={`w-[18px] h-[18px] ${active ? 'text-blue-500' : 'group-hover:text-blue-400'}`}></i>
+                <span className="font-semibold text-[13px] tracking-tight">{label}</span>
+            </button>
+        );
+
+        const SectionHeader = ({ title, subtitle }) => (
+            <div className="mb-8">
+                <h2 className="text-2xl font-extrabold text-white tracking-tight">{title}</h2>
+                <p className="text-slate-500 text-sm mt-1">{subtitle}</p>
             </div>
         );
 
-        const PlatformCard = ({ name, type, description, incidents, viewers, share, icon }) => (
-            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5 hover:border-blue-500/30 transition-all group">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-500/5 rounded-lg border border-blue-500/10">
-                            <i data-lucide={icon} className="w-5 h-5 text-blue-500"></i>
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-white tracking-tight">{name}</h3>
-                            <span className="text-[9px] font-bold text-slate-500 uppercase bg-slate-800/50 px-1.5 py-0.5 rounded tracking-tighter">{type}</span>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                        <span className="text-[9px] font-bold text-red-500 uppercase tracking-widest">Live</span>
-                    </div>
-                </div>
-                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed h-8 line-clamp-2">{description}</p>
-                <div className="grid grid-cols-3 gap-2">
-                    {[
-                        { label: 'Incidents', val: incidents },
-                        { label: 'Viewers', val: viewers },
-                        { label: 'Share', val: share }
-                    ].map(stat => (
-                        <div key={stat.label} className="bg-[#050510] p-3 rounded-lg border border-slate-800/50 text-center">
-                            <p className="text-white text-xs font-black">{stat.val}</p>
-                            <p className="text-[8px] text-slate-500 uppercase font-bold mt-1 tracking-tighter">{stat.label}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-
-        function App() {
-            const [view, setView] = useState('Overview');
-            const [scanStatus, setScanStatus] = useState('idle');
-            const [url, setUrl] = useState('');
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('Overview');
+            const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, result
             const chartInstances = useRef({});
 
             useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-                if (view === 'Overview') renderCharts();
-                return () => Object.values(chartInstances.current).forEach(c => c.destroy());
-            }, [view]);
+                window.lucide.createIcons();
+                if (activeTab === 'Overview') renderOverviewCharts();
+            }, [activeTab, scanStatus]);
 
-            const renderCharts = () => {
+            const renderOverviewCharts = () => {
+                // Main Traffic Chart
                 const trafficCtx = document.getElementById('trafficChart');
                 if (trafficCtx) {
+                    if (chartInstances.current.traffic) chartInstances.current.traffic.destroy();
                     chartInstances.current.traffic = new Chart(trafficCtx, {
                         type: 'line',
                         data: {
-                            labels: ['07:14', '09:14', '11:14', '13:14', '15:14', '17:14', '19:14', '21:14', '23:14', '01:14', '03:14', '05:14'],
-                            datasets: [{
-                                data: [120, 110, 90, 70, 60, 55, 50, 45, 80, 100, 120, 110],
-                                borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
-                            }]
+                            labels: ['08:10', '10:10', '12:10', '14:10', '16:10', '18:10', '20:10', '22:10', '00:10', '02:10', '04:10', '06:10'],
+                            datasets: [
+                                { label: 'Estimated', data: [120, 95, 70, 50, 45, 60, 40, 75, 100, 115, 105, 90], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4, pointRadius: 0 },
+                                { label: 'Blocked', data: [85, 70, 55, 40, 35, 45, 30, 50, 75, 85, 80, 70], borderColor: '#60a5fa', borderDash: [5, 5], fill: false, tension: 0.4, pointRadius: 0 }
+                            ]
                         },
-                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } } } }
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 10 } } }, y: { grid: { color: '#1e293b' }, ticks: { color: '#475569', font: { size: 10 } } } } }
+                    });
+                }
+
+                // Regional Bar Chart
+                const regionalCtx = document.getElementById('regionalChart');
+                if (regionalCtx) {
+                    if (chartInstances.current.regional) chartInstances.current.regional.destroy();
+                    chartInstances.current.regional = new Chart(regionalCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Asia', 'Europe', 'Global', 'Middle East', 'Africa', 'South Am', 'North Am'],
+                            datasets: [{ data: [240, 120, 70, 65, 40, 30, 10], backgroundColor: '#3b82f6', borderRadius: 4 }]
+                        },
+                        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold' } } } } }
                     });
                 }
             };
 
-            const handleScan = () => {
-                if(!url) return;
+            const runScan = () => {
                 setScanStatus('scanning');
-                setTimeout(() => {
-                    setScanStatus('completed');
-                    setTimeout(() => window.lucide.createIcons(), 50);
-                }, 1800);
+                setTimeout(() => setScanStatus('result'), 2500);
             };
 
-            const predictions = [
-                { match: "Manchester United vs Liverpool", league: "Premier League", time: "30 mins", piracy: "1.2M+ viewers", conf: "0.94", level: "Critical", color: "bg-red-500" },
-                { match: "Real Madrid vs Barcelona — El Clásico", league: "La Liga", time: "2h 15m", piracy: "2.1M+ viewers", conf: "0.97", level: "Critical", color: "bg-red-500" },
-                { match: "Lakers vs Celtics", league: "NBA", time: "5h 40m", piracy: "640K+ viewers", conf: "0.88", level: "High", color: "bg-orange-500" },
-                { match: "India vs Pakistan — T20 World Cup", league: "ICC", time: "3d 09h", piracy: "4.5M+ viewers", conf: "0.99", level: "Critical", color: "bg-red-500" },
-                { match: "Monaco Grand Prix — Final Practice", league: "Formula 1", time: "8h 02m", piracy: "410K+ viewers", conf: "0.82", level: "High", color: "bg-orange-500" }
-            ];
-
             return (
-                <div className="flex h-screen w-full bg-[#050510] overflow-hidden">
+                <div className="flex h-screen w-full bg-[#050510]">
                     {/* Navigation Sidebar */}
-                    <aside className="w-52 bg-[#03030b] border-r border-slate-800 p-4 flex flex-col shrink-0">
-                        <div className="flex items-center gap-2 text-blue-500 mb-10 px-2">
-                            <i data-lucide="shield" className="w-6 h-6"></i>
-                            <span className="text-base font-bold text-white tracking-tight uppercase">Sports Shield</span>
+                    <aside className="w-[240px] bg-[#03030b] border-r border-slate-800/60 p-5 flex flex-col shrink-0">
+                        <div className="flex items-center gap-3 text-blue-500 mb-10 px-2">
+                            <i data-lucide="shield" className="w-7 h-7 fill-blue-500/20"></i>
+                            <h1 className="text-lg font-black text-white tracking-tighter uppercase">Sports Shield</h1>
                         </div>
-                        <nav className="space-y-1 flex-1 text-slate-500">
-                            <p className="text-[8px] font-bold uppercase tracking-widest px-3 mb-2 text-slate-600">Mission Control</p>
-                            {[
-                                { id: 'Overview', icon: 'layout-dashboard' },
-                                { id: 'Scanner', icon: 'search' },
-                                { id: 'Apps', icon: 'layers' },
-                                { id: 'Predictions', icon: 'trending-up' },
-                                { id: 'Tracking', icon: 'map' },
-                                { id: 'Assets', icon: 'lock' },
-                                { id: 'Enforcement', icon: 'gavel' },
-                                { id: 'Settings', icon: 'settings' }
-                            ].map((item) => (
-                                <button key={item.id} onClick={() => {setView(item.id); setScanStatus('idle'); setUrl('');}} className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-[11px] font-medium transition ${view === item.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:text-white hover:bg-slate-800/40'}`}>
-                                    <i data-lucide={item.icon} className="w-3.5 h-3.5"></i> {item.id}
-                                </button>
-                            ))}
-                        </nav>
+
+                        <div className="flex-1 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 px-3 mb-3">Mission Control</p>
+                            <SidebarItem id="Overview" icon="activity" label="Overview" active={activeTab === 'Overview'} onClick={setActiveTab} />
+                            <SidebarItem id="Scanner" icon="search" label="Scanner" active={activeTab === 'Scanner'} onClick={setActiveTab} />
+                            <SidebarItem id="Apps" icon="layers" label="Apps" active={activeTab === 'Apps'} onClick={setActiveTab} />
+                            <SidebarItem id="Predictions" icon="trending-up" label="Predictions" active={activeTab === 'Predictions'} onClick={setActiveTab} />
+                            <SidebarItem id="Tracking" icon="map" label="Tracking" active={activeTab === 'Tracking'} onClick={setActiveTab} />
+                            <SidebarItem id="Assets" icon="lock" label="Assets" active={activeTab === 'Assets'} onClick={setActiveTab} />
+                            <SidebarItem id="Enforcement" icon="gavel" label="Enforcement" active={activeTab === 'Enforcement'} onClick={setActiveTab} />
+                            <SidebarItem id="Settings" icon="settings" label="Settings" active={activeTab === 'Settings'} onClick={setActiveTab} />
+                        </div>
+
+                        <div className="mt-auto pt-6 border-t border-slate-800/50">
+                            <div className="flex items-center gap-3 px-3 py-2 bg-slate-900/40 rounded-xl border border-slate-800">
+                                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs">SA</div>
+                                <div className="overflow-hidden">
+                                    <p className="text-white font-bold text-[11px] truncate">Premier Admin</p>
+                                    <p className="text-blue-500 text-[9px] font-black uppercase">Live • synced</p>
+                                </div>
+                            </div>
+                        </div>
                     </aside>
 
-                    {/* Content Space */}
-                    <main className="flex-1 overflow-y-auto p-8">
-                        <header className="mb-8">
-                            <h2 className="text-2xl font-bold text-white tracking-tight">
-                                {view === 'Predictions' ? 'Predictive Intelligence' : view === 'Apps' ? 'Monitored Platforms' : view === 'Scanner' ? 'Stream Scanner' : 'Operations Overview'}
-                            </h2>
-                            <p className="text-slate-500 text-[11px] mt-0.5">
-                                {view === 'Predictions' ? 'AI-driven forecasts for upcoming high-risk broadcasting events.' : 'Real-time piracy intelligence and global enforcement metrics.'}
-                            </p>
-                        </header>
-
-                        {/* OVERVIEW SCREEN */}
-                        {view === 'Overview' && (
-                            <div className="space-y-4 animate-in fade-in duration-500">
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                    <StatCard title="Active Incidents" value="11" change="+12%" icon="activity" color={{bg:'bg-red-500', text:'text-red-500'}} />
-                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" icon="eye-off" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
-                                    <StatCard title="Takedowns" value="5" change="+2%" icon="gavel" color={{bg:'bg-blue-400', text:'text-blue-400'}} />
-                                    <StatCard title="Protected Assets" value="8" change="0%" icon="lock" color={{bg:'bg-blue-600', text:'text-blue-600'}} />
-                                    <StatCard title="Revenue Recovered" value="$4.82M" change="+18%" icon="dollar-sign" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
-                                    <StatCard title="Avg Response" value="47s" change="-1s" icon="clock" color={{bg:'bg-yellow-500', text:'text-yellow-500'}} />
-                                </div>
+                    {/* Main Workspace */}
+                    <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#050510] p-10 relative">
+                        
+                        {/* --- OVERVIEW SECTION --- */}
+                        {activeTab === 'Overview' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <SectionHeader title="Operations Overview" subtitle="Real-time piracy intelligence and enforcement metrics." />
                                 
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                    <div className="lg:col-span-2 bg-[#0a0a1f] border border-slate-800 rounded-xl p-5">
-                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-5 tracking-widest">24h Piracy Traffic</h4>
-                                        <div className="h-[180px] w-full"><canvas id="trafficChart"></canvas></div>
+                                <div className="grid grid-cols-6 gap-4 mb-8">
+                                    {[
+                                        { l: 'Active Incidents', v: '11', c: '+12%', i: 'activity', clr: 'text-red-500' },
+                                        { l: 'Viewers Blocked', v: '285,400', c: '+5%', i: 'eye-off', clr: 'text-blue-400' },
+                                        { l: 'Takedowns Today', v: '5', c: '+2%', i: 'gavel', clr: 'text-blue-500' },
+                                        { l: 'Protected Assets', v: '8', c: '0%', i: 'lock', clr: 'text-blue-600' },
+                                        { l: 'Revenue Recovered', v: '$4.82M', c: '+18%', i: 'dollar-sign', clr: 'text-emerald-500' },
+                                        { l: 'Avg Response', v: '47s', c: '-1s', i: 'clock', clr: 'text-orange-500' }
+                                    ].map((s, idx) => (
+                                        <div key={idx} className="bg-[#0a0a1f] border border-slate-800/60 p-4 rounded-xl hover:border-blue-500/40 transition-all group">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <i data-lucide={s.i} className={`w-4 h-4 ${s.clr}`}></i>
+                                                <span className="text-[10px] font-black text-blue-400">{s.c}</span>
+                                            </div>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-2">{s.l}</p>
+                                            <p className="text-xl font-black text-white">{s.v}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-6">
+                                    <div className="col-span-2 bg-[#0a0a1f] border border-slate-800/60 p-6 rounded-2xl h-[340px]">
+                                        <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest">24h Piracy Traffic</h4>
+                                        <div className="h-[240px]"><canvas id="trafficChart"></canvas></div>
                                     </div>
-                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-5">
-                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase mb-4 tracking-widest">High-Risk Upcoming</h4>
-                                        <div className="space-y-2">
-                                            {['Manchester United vs Liverpool', 'Real Madrid vs Barcelona'].map(match => (
-                                                <div key={match} className="p-3 bg-[#050510] rounded-lg border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-blue-500/50">
-                                                    <span className="text-[10px] text-white font-medium">{match}</span>
-                                                    <span className="text-red-500 text-[8px] font-black px-1.5 py-0.5 bg-red-500/10 rounded uppercase tracking-tighter">Critical</span>
+                                    <div className="bg-[#0a0a1f] border border-slate-800/60 p-6 rounded-2xl h-[340px] overflow-hidden flex flex-col">
+                                        <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest">High-Risk Upcoming</h4>
+                                        <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1">
+                                            {[
+                                                { m: 'Manchester United vs Liverpool', l: 'Premier League', t: '30 mins', r: 'Critical' },
+                                                { m: 'Real Madrid vs Barcelona', l: 'La Liga', t: '2h 15m', r: 'Critical' },
+                                                { m: 'Lakers vs Celtics', l: 'NBA', t: '5h 40m', r: 'High' }
+                                            ].map((match, i) => (
+                                                <div key={i} className="bg-[#050510] border border-slate-800 p-4 rounded-xl flex justify-between items-center group cursor-pointer hover:border-blue-500/50 transition-all">
+                                                    <div>
+                                                        <p className="text-[11px] font-bold text-white mb-0.5">{match.m}</p>
+                                                        <p className="text-[10px] text-slate-500">{match.l} • In {match.t}</p>
+                                                    </div>
+                                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase ${match.r === 'Critical' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                                                        {match.r}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
+                                    </div>
+
+                                    {/* Regional Distribution Row */}
+                                    <div className="bg-[#0a0a1f] border border-slate-800/60 p-6 rounded-2xl h-[280px]">
+                                        <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest">Regional Distribution</h4>
+                                        <div className="h-[180px]"><canvas id="regionalChart"></canvas></div>
+                                    </div>
+                                    <div className="bg-[#0a0a1f] border border-slate-800/60 p-6 rounded-2xl h-[280px] flex items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
+                                                <i data-lucide="shield-check" className="text-blue-500 w-6 h-6"></i>
+                                            </div>
+                                            <p className="text-white font-bold text-sm">System Healthy</p>
+                                            <p className="text-slate-500 text-[11px]">All nodes reporting normal traffic.</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 border border-blue-400/20 p-6 rounded-2xl h-[280px] text-white">
+                                        <h4 className="text-xs font-black uppercase tracking-widest opacity-60 mb-8">AI Optimization</h4>
+                                        <p className="text-2xl font-black mb-2">94%</p>
+                                        <p className="text-[11px] font-medium leading-relaxed opacity-80">Detection efficiency increased by 14% following the latest fingerprint engine update.</p>
+                                        <button className="mt-10 w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/20">View Detailed Report</button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* SCANNER SCREEN */}
-                        {view === 'Scanner' && (
-                            <div className="max-w-4xl mx-auto space-y-4 animate-in fade-in duration-300">
-                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-10">
-                                    <h3 className="text-xs font-bold text-white uppercase mb-4 flex items-center gap-2">
-                                        <i data-lucide="zap" className="w-3.5 h-3.5 text-blue-500"></i> Live Probe
-                                    </h3>
-                                    <div className="flex gap-2">
-                                        <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="e.g. https://www.bing.com/..." className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-2.5 text-[11px] font-mono text-blue-400 focus:outline-none focus:border-blue-500" />
-                                        <button onClick={handleScan} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg text-xs transition-colors">Run Scan</button>
+                        {/* --- SCANNER SECTION --- */}
+                        {activeTab === 'Scanner' && (
+                            <div className="max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-500">
+                                <SectionHeader title="Stream Scanner" subtitle="Probe a stream URL or channel handle for piracy signals against the fingerprint vault." />
+                                
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-10 mb-6 shadow-2xl">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20"><i data-lucide="zap" className="w-5 h-5 text-blue-500"></i></div>
+                                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Live Probe</h3>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <input 
+                                            type="text" 
+                                            placeholder="e.g. t.me/+RedDevilsHD-EPL or https://stream.example.com/live" 
+                                            className="flex-1 bg-[#050510] border border-slate-800 rounded-xl px-5 py-4 text-blue-400 font-mono text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-700"
+                                        />
+                                        <button 
+                                            onClick={runScan}
+                                            className="bg-blue-600 hover:bg-blue-500 text-white font-black px-10 rounded-xl text-xs uppercase tracking-widest flex items-center gap-2 transition-all shadow-[0_10px_20px_rgba(59,130,246,0.2)] active:scale-95"
+                                        >
+                                            {scanStatus === 'scanning' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <i data-lucide="scan" className="w-4 h-4"></i>}
+                                            {scanStatus === 'scanning' ? 'Analyzing...' : 'Run Scan'}
+                                        </button>
+                                    </div>
+                                    <div className="mt-6 flex items-center gap-4">
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase">Try:</span>
+                                        {['t.me/RedDevilsHD-EPL', 'youtube.com/live/laliga-hd'].map(t => (
+                                            <button key={t} className="text-[10px] font-mono text-slate-500 bg-[#050510] px-2 py-1 rounded border border-slate-800 hover:text-blue-400 hover:border-blue-500/30">{t}</button>
+                                        ))}
                                     </div>
                                 </div>
-                                {scanStatus === 'completed' && (
-                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 animate-in zoom-in-95 duration-300">
-                                        <div className="flex justify-between items-center mb-6"><h4 className="text-[10px] font-bold text-white uppercase tracking-widest">Scan Result Summary</h4><span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-500/20 uppercase tracking-widest">Suspicious</span></div>
-                                        <div className="grid grid-cols-4 gap-4">
-                                            {[{l:'Score', v:'95/100', c:'text-blue-400'}, {l:'Region', v:'South Asia', c:'text-white'}, {l:'Viewers', v:'78,085', c:'text-white'}, {l:'ID', v:'0x23C2E7', c:'text-white font-mono'}].map((s,i)=>(
-                                                <div key={i} className="p-4 bg-[#050510] rounded-lg border border-slate-800/50 text-center">
-                                                    <p className="text-slate-500 text-[8px] uppercase font-bold mb-1 tracking-widest">{s.l}</p>
-                                                    <p className={`text-lg font-black ${s.c}`}>{s.v}</p>
+
+                                {scanStatus === 'scanning' && (
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 space-y-6">
+                                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Probe Pipeline</h4>
+                                        {[
+                                            { t: 'Resolving target endpoint', s: 'Endpoint resolved • 3 hops' },
+                                            { t: 'Probing media stream signature', s: 'H.264 1080p • 60fps • 6 Mbps' },
+                                            { t: 'Comparing against fingerprint vault', s: 'Matching indices...' }
+                                        ].map((p, i) => (
+                                            <div key={i} className="flex gap-4 items-start animate-pulse">
+                                                <div className="w-5 h-5 rounded-full border border-blue-500/50 flex items-center justify-center mt-0.5"><div className="w-2 h-2 bg-blue-500 rounded-full"></div></div>
+                                                <div>
+                                                    <p className="text-[11px] font-bold text-white">{p.t}</p>
+                                                    <p className="text-[10px] text-slate-500 mt-0.5">{p.s}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {scanStatus === 'result' && (
+                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-8 animate-in slide-in-from-top-4 duration-500 shadow-[0_0_50px_rgba(239,68,68,0.05)]">
+                                        <div className="flex justify-between items-center mb-8 pb-8 border-b border-slate-800/50">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <i data-lucide="alert-triangle" className="w-4 h-4 text-red-500"></i>
+                                                    <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Scan Report</h4>
+                                                </div>
+                                                <p className="text-[11px] text-blue-400 font-mono">youtube.com/live/laliga-hd-stream-es</p>
+                                            </div>
+                                            <span className="bg-red-500/20 text-red-500 text-[10px] font-black px-3 py-1 rounded-lg border border-red-500/30 uppercase tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.1)]">Confirmed Piracy</span>
+                                        </div>
+                                        
+                                        <div className="mb-10">
+                                            <div className="flex justify-between text-[11px] font-bold mb-3">
+                                                <span className="text-slate-400 uppercase tracking-widest">Risk Score</span>
+                                                <span className="text-red-500">96/100</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-[#050510] rounded-full overflow-hidden border border-slate-800">
+                                                <div className="h-full bg-gradient-to-r from-blue-600 to-red-500 w-[96%]"></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-4 gap-6 mb-10">
+                                            {[
+                                                { l: 'Fingerprint', v: '0x00D57A74', i: 'fingerprint' },
+                                                { l: 'Region', v: 'Europe', i: 'globe' },
+                                                { l: 'Est. Viewers', v: '16,196', i: 'users' },
+                                                { l: 'Protocol', v: 'HLS', i: 'file-code' }
+                                            ].map((r, i) => (
+                                                <div key={i} className="p-5 bg-[#050510] rounded-xl border border-slate-800/50">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <i data-lucide={r.i} className="w-3.5 h-3.5 text-slate-500"></i>
+                                                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{r.l}</p>
+                                                    </div>
+                                                    <p className="text-sm font-black text-white">{r.v}</p>
                                                 </div>
                                             ))}
+                                        </div>
+
+                                        <div className="p-5 bg-red-500/5 border border-red-500/10 rounded-xl flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Matched Protected Asset</p>
+                                                <p className="text-sm font-black text-white tracking-tight">UEFA Champions League Final 2026</p>
+                                            </div>
+                                            <button className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-black text-[10px] rounded-lg uppercase tracking-widest transition-all shadow-lg active:scale-95">Initiate Takedown</button>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* APPS SCREEN */}
-                        {view === 'Apps' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-500">
-                                <PlatformCard name="Illegal IPTV" type="IPTV App" description="Standalone apps streaming pirated channel bundles." incidents="2" viewers="419.4k" share="17%" icon="tv" />
-                                <PlatformCard name="TikTok" type="Web" description="Generic web players hosted on bulletproof infra." incidents="1" viewers="184.6k" share="8%" icon="globe" />
-                                <PlatformCard name="Telegram" type="Messaging" description="Private channels redistributing live HD streams." incidents="2" viewers="79.0k" share="17%" icon="send" />
-                                <PlatformCard name="YouTube" type="Video" description="Restream channels masquerading as fan content." incidents="1" viewers="57.8k" share="8%" icon="youtube" />
+                        {/* --- APPS SECTION --- */}
+                        {activeTab === 'Apps' && (
+                            <div className="animate-in fade-in duration-500">
+                                <SectionHeader title="Monitored Platforms" subtitle="Apps and surfaces under continuous surveillance for unauthorized rebroadcast." />
+                                <div className="grid grid-cols-3 gap-5">
+                                    {[
+                                        { n: 'Illegal IPTV', t: 'IPTV App', d: 'Standalone apps streaming pirated channel bundles.', v: '419.4k', s: '17%', i: '2', icon: 'tv' },
+                                        { n: 'TikTok', t: 'Web', d: 'Generic web players hosted on bulletproof infra.', v: '184.6k', s: '8%', i: '1', icon: 'globe' },
+                                        { n: 'Pirate IPTV', t: 'Web', d: 'Generic web players hosted on bulletproof infra.', v: '129.0k', s: '8%', i: '1', icon: 'server' },
+                                        { n: 'Twitter/X', t: 'Social', d: 'Short clips and embedded live windows of broadcasts.', v: '94.4k', s: '8%', i: '1', icon: 'twitter' },
+                                        { n: 'Telegram', t: 'Messaging', d: 'Private channels redistributing live HD streams.', v: '79.0k', s: '17%', i: '2', icon: 'send' },
+                                        { n: 'Facebook', t: 'Web', d: 'Generic web players hosted on bulletproof infra.', v: '67.2k', s: '8%', i: '1', icon: 'facebook' }
+                                    ].map((app, i) => (
+                                        <div key={i} className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-6 hover:border-blue-500/40 transition-all group">
+                                            <div className="flex justify-between items-start mb-5">
+                                                <div className="flex gap-3">
+                                                    <div className="p-3 bg-blue-500/5 rounded-xl border border-blue-500/10"><i data-lucide={app.icon} className="w-5 h-5 text-blue-500"></i></div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-white mb-0.5">{app.n}</h4>
+                                                        <span className="text-[9px] font-black text-slate-500 uppercase px-1.5 py-0.5 bg-slate-800/50 rounded">{app.t}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                                    <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Live</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-[11px] text-slate-400 mb-8 leading-relaxed h-8 line-clamp-2">{app.d}</p>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {[ {l:'Incidents', v:app.i}, {l:'Viewers', v:app.v}, {l:'Share', v:app.s} ].map(st => (
+                                                    <div key={st.l} className="bg-[#050510] p-3 rounded-xl border border-slate-800/50 text-center">
+                                                        <p className="text-white text-[12px] font-black">{st.v}</p>
+                                                        <p className="text-[8px] text-slate-500 uppercase font-bold mt-1 tracking-tighter">{st.l}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="mt-5 pt-4 border-t border-slate-800/50 flex items-center gap-2 text-[9px] font-bold text-blue-500/60 uppercase">
+                                                <i data-lucide="activity" className="w-3 h-3"></i> Continuous monitoring active
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
-                        {/* PREDICTIONS SCREEN */}
-                        {view === 'Predictions' && (
-                            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl overflow-hidden animate-in fade-in duration-500 shadow-2xl">
-                                <div className="p-5 border-b border-slate-800 bg-[#0c0c28]/30"><h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Forecasted Risk Events</h4></div>
-                                <table className="w-full text-left text-[11px]">
-                                    <thead className="bg-[#050510] text-slate-500 uppercase font-bold border-b border-slate-800">
-                                        <tr>
-                                            <th className="px-6 py-4">Match / Event</th>
-                                            <th className="px-6 py-4">League</th>
-                                            <th className="px-6 py-4">Time</th>
-                                            <th className="px-6 py-4">Est. Piracy</th>
-                                            <th className="px-6 py-4">Conf.</th>
-                                            <th className="px-6 py-4 text-right">Risk Level</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-800/50">
-                                        {predictions.map((p, i) => (
-                                            <tr key={i} className="hover:bg-slate-800/20 transition-colors">
-                                                <td className="px-6 py-4 font-bold text-white">{p.match}</td>
-                                                <td className="px-6 py-4 text-slate-400">{p.league}</td>
-                                                <td className="px-6 py-4 text-slate-400">{p.time}</td>
-                                                <td className="px-6 py-4 text-red-400 font-bold">{p.piracy}</td>
-                                                <td className="px-6 py-4 text-blue-400 font-mono text-[10px]">{p.conf}</td>
-                                                <td className="px-6 py-4 text-right"><span className={`${p.color} text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter`}>{p.level}</span></td>
+                        {/* --- PREDICTIONS SECTION --- */}
+                        {activeTab === 'Predictions' && (
+                            <div className="animate-in fade-in duration-500">
+                                <SectionHeader title="Predictive Intelligence" subtitle="AI-driven forecasts for upcoming high-risk broadcasting events." />
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/10">
+                                        <h4 className="text-xs font-bold text-white uppercase tracking-widest">Forecasted Risk Events</h4>
+                                        <div className="flex gap-2">
+                                            <div className="relative">
+                                                <i data-lucide="search" className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                                                <input type="text" placeholder="Search events..." className="bg-[#050510] border border-slate-800 rounded-lg pl-9 pr-4 py-1.5 text-[11px] text-white focus:outline-none focus:border-blue-500 w-[200px]" />
+                                            </div>
+                                            <button className="p-2 bg-[#050510] border border-slate-800 rounded-lg text-slate-500 hover:text-white"><i data-lucide="filter" className="w-3.5 h-3.5"></i></button>
+                                        </div>
+                                    </div>
+                                    <table className="w-full text-left text-[12px]">
+                                        <thead className="bg-[#050510] text-slate-500 uppercase font-bold text-[10px] border-b border-slate-800">
+                                            <tr>
+                                                <th className="px-6 py-4">Match / Event</th>
+                                                <th className="px-6 py-4">League</th>
+                                                <th className="px-6 py-4">Time to Event</th>
+                                                <th className="px-6 py-4">Est. Piracy</th>
+                                                <th className="px-6 py-4">Confidence</th>
+                                                <th className="px-6 py-4 text-right">Risk Level</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-800/50">
+                                            {[
+                                                { m: 'Manchester United vs Liverpool', l: 'Premier League', t: '30 mins', p: '1.2M+', c: '0.94', r: 'Critical' },
+                                                { m: 'Real Madrid vs Barcelona', l: 'La Liga', t: '2h 15m', p: '2.1M+', c: '0.97', r: 'Critical' },
+                                                { m: 'Lakers vs Celtics', l: 'NBA', t: '5h 40m', p: '640K+', c: '0.88', r: 'High' },
+                                                { m: 'Monaco Grand Prix — Final Practice', l: 'Formula 1', t: '8h 02m', p: '410K+', c: '0.82', r: 'High' },
+                                                { m: 'India vs Pakistan — T20 World Cup', l: 'ICC', t: '3d 09h', p: '4.5M+', c: '0.99', r: 'Critical' }
+                                            ].map((ev, i) => (
+                                                <tr key={i} className="hover:bg-slate-800/20 transition-all group">
+                                                    <td className="px-6 py-4 font-bold text-white">{ev.m}</td>
+                                                    <td className="px-6 py-4 text-slate-500">{ev.l}</td>
+                                                    <td className="px-6 py-4 text-slate-500">{ev.t}</td>
+                                                    <td className="px-6 py-4 text-red-500 font-bold"><div className="flex items-center gap-2"><i data-lucide="alert-circle" className="w-3 h-3"></i> {ev.p} viewers</div></td>
+                                                    <td className="px-6 py-4 text-blue-500 font-mono font-bold"><span className="px-2 py-0.5 bg-blue-500/10 rounded">{ev.c}</span></td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter ${ev.r === 'Critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}>
+                                                            {ev.r}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- SETTINGS SECTION --- */}
+                        {activeTab === 'Settings' && (
+                            <div className="max-w-4xl animate-in fade-in duration-500 space-y-6">
+                                <SectionHeader title="System Settings" subtitle="Configure detection thresholds, automation policies, and integrations." />
+                                
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8">
+                                    <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2"><i data-lucide="globe" className="w-4 h-4 text-blue-500"></i> Organization</h4>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div><label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Organization Name</label><input type="text" defaultValue="Premier Broadcast Group" className="w-full bg-[#050510] border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none" /></div>
+                                        <div><label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Region</label><input type="text" defaultValue="EU · UK · APAC" className="w-full bg-[#050510] border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none" /></div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8">
+                                    <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-2"><i data-lucide="cpu" className="w-4 h-4 text-blue-500"></i> Detection Engine</h4>
+                                    <div className="mb-8">
+                                        <div className="flex justify-between items-center mb-4"><span className="text-[10px] font-bold text-slate-500 uppercase">Risk score threshold</span><span className="text-blue-500 font-bold">75/100</span></div>
+                                        <div className="h-1.5 w-full bg-[#050510] rounded-full overflow-hidden border border-slate-800"><div className="h-full bg-blue-600 w-3/4"></div></div>
+                                        <p className="text-[10px] text-slate-500 mt-4 leading-relaxed">Streams scoring above this threshold are flagged for enforcement review.</p>
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-[#050510] rounded-xl border border-slate-800">
+                                        <div><p className="text-[11px] font-bold text-white">Content poisoning injection</p><p className="text-[10px] text-slate-500 mt-1">Inject corrupted segments into confirmed pirated streams.</p></div>
+                                        <div className="w-10 h-5 bg-blue-600 rounded-full relative"><div className="w-3.5 h-3.5 bg-white rounded-full absolute right-1 top-1/2 -translate-y-1/2 shadow-lg"></div></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-3 pt-6">
+                                    <button className="px-6 py-2.5 text-slate-400 hover:text-white font-black text-[10px] uppercase tracking-widest transition-all">Discard</button>
+                                    <button className="px-10 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] rounded-xl uppercase tracking-widest transition-all shadow-lg active:scale-95">Save Changes</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- PLACEHOLDER FOR OTHER SECTIONS --- */}
+                        {['Tracking', 'Assets', 'Enforcement'].includes(activeTab) && (
+                            <div className="flex flex-col items-center justify-center h-[70vh] animate-in fade-in duration-500">
+                                <div className="w-16 h-16 bg-slate-800/20 rounded-2xl flex items-center justify-center mb-6 border border-slate-800">
+                                    <i data-lucide="construction" className="w-8 h-8 text-slate-600"></i>
+                                </div>
+                                <h2 className="text-xl font-black text-white uppercase tracking-tighter">{activeTab} Interface</h2>
+                                <p className="text-slate-500 text-sm mt-2">Module is currently being synced with live data pipelines.</p>
                             </div>
                         )}
                     </main>
                 </div>
             );
-        }
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
