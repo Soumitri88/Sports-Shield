@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "hello": "tsx ./src/hello.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
+  "dev": "vite",
+  "build": "tsc && vite build",
+  "preview": "vite preview"
+},
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:"

@@ -6,7 +6,7 @@ const StatCard = ({ title, value, color }: { title: string, value: string, color
     backgroundColor: '#000044', // Darker navy for cards
     padding: '20px',
     borderRadius: '12px',
-    border: `1px solid ${color}`,
+   border: `1px solid ${color}`,
     minWidth: '200px',
     margin: '10px'
   }}>
