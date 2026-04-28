@@ -18,6 +18,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // Reusable Card for the Overview Grid
         const StatCard = ({ title, value, change, icon, color }) => (
             <div className="bg-[#0a0a1f] border border-slate-800 p-3 rounded-lg shadow-sm hover:border-blue-500 transition-all">
                 <div className="flex justify-between items-start mb-2">
@@ -33,20 +34,20 @@
 
         function App() {
             const [view, setView] = useState('Overview');
-            const [isScanning, setIsScanning] = useState(false);
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
                 
+                // Only initialize charts if we are on the Overview page
                 if (view === 'Overview') {
                     const trafficCtx = document.getElementById('trafficChart');
                     if (trafficCtx) {
                         new Chart(trafficCtx, {
                             type: 'line',
                             data: {
-                                labels: ['07:14', '11:14', '15:14', '19:14', '23:14', '03:14', '05:14'],
+                                labels: ['07:14', '09:14', '11:14', '13:14', '15:14', '17:14', '19:14', '21:14', '23:14', '01:14', '03:14', '05:14'],
                                 datasets: [{
-                                    data: [120, 90, 60, 50, 80, 110, 100],
+                                    data: [120, 110, 90, 70, 60, 55, 50, 45, 80, 100, 120, 110],
                                     borderColor: '#3b82f6',
                                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                     fill: true, tension: 0.4, pointRadius: 0
@@ -65,9 +66,9 @@
                         new Chart(regionCtx, {
                             type: 'bar',
                             data: {
-                                labels: ['Asia', 'EU', 'Global', 'ME', 'Africa'],
+                                labels: ['Asia', 'Europe', 'Global', 'Middle East', 'Africa', 'South America', 'North America'],
                                 datasets: [{
-                                    data: [240000, 120000, 70000, 65000, 40000],
+                                    data: [240000, 120000, 70000, 65000, 40000, 20000, 10000],
                                     backgroundColor: '#3b82f6',
                                     borderRadius: 2,
                                     barThickness: 8
@@ -86,18 +87,18 @@
 
             return (
                 <div className="flex h-screen w-full bg-[#050510]">
-                    {/* Sidebar navigation controls which view is active */}
-                    <aside className="w-52 bg-[#03030b] border-r border-slate-800 p-4 space-y-6">
-                        <div className="flex items-center gap-2 text-blue-500 mb-6">
+                    {/* Sidebar */}
+                    <aside className="w-52 bg-[#03030b] border-r border-slate-800 p-4 flex flex-col">
+                        <div className="flex items-center gap-2 text-blue-500 mb-8 px-2">
                             <i data-lucide="shield" className="w-6 h-6"></i>
                             <span className="text-lg font-bold text-white tracking-tight">Sports Shield</span>
                         </div>
-                        <nav className="space-y-1">
-                            {['Overview', 'Scanner', 'Apps', 'Tracking', 'Enforcement'].map((item) => (
+                        <nav className="space-y-1 flex-1">
+                            {['Overview', 'Scanner', 'Apps', 'Predictions', 'Tracking', 'Assets', 'Enforcement', 'Settings'].map((item) => (
                                 <button 
                                     key={item} 
                                     onClick={() => setView(item)} 
-                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[11px] font-medium transition ${view === item ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-[11px] font-medium transition ${view === item ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
                                 >
                                     <i data-lucide={item === 'Overview' ? 'layout-dashboard' : item === 'Scanner' ? 'search' : 'box'} className="w-3.5 h-3.5"></i>
                                     {item}
@@ -106,27 +107,29 @@
                         </nav>
                     </aside>
 
+                    {/* Main Content Area */}
                     <main className="flex-1 overflow-y-auto p-6">
                         <header className="mb-6">
                             <h2 className="text-2xl font-bold text-white tracking-tight">
-                                {view === 'Scanner' ? 'Stream Scanner' : view + ' Overview'}
+                                {view === 'Scanner' ? 'Stream Scanner' : 'Operations Overview'}
                             </h2>
                             <p className="text-slate-500 text-[11px]">
-                                {view === 'Scanner' ? 'Probe a stream URL for piracy signals against the fingerprint vault.' : 'Real-time piracy intelligence and metrics.'}
+                                {view === 'Scanner' ? 'Probe a stream URL or channel handle for piracy signals.' : 'Real-time piracy intelligence and enforcement metrics.'}
                             </p>
                         </header>
 
-                        {/* Condition 1: Overview Page */}
+                        {/* VIEW 1: OVERVIEW */}
                         {view === 'Overview' && (
-                            <div className="space-y-4">
+                            <div className="space-y-4 animate-in fade-in duration-500">
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                    <StatCard title="Active" value="11" change="+12%" icon="activity" color={{bg:'bg-red-500', text:'text-red-500'}} />
-                                    <StatCard title="Blocked" value="285.4K" change="+5%" icon="eye-off" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
-                                    <StatCard title="Takedowns" value="5" change="+2%" icon="gavel" color={{bg:'bg-blue-400', text:'text-blue-400'}} />
-                                    <StatCard title="Assets" value="8" change="0%" icon="lock" color={{bg:'bg-blue-600', text:'text-blue-600'}} />
-                                    <StatCard title="Revenue" value="$4.82M" change="+18%" icon="dollar-sign" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
-                                    <StatCard title="Response" value="47s" change="-1s" icon="clock" color={{bg:'bg-yellow-500', text:'text-yellow-500'}} />
+                                    <StatCard title="Active Incidents" value="11" change="+12%" icon="activity" color={{bg:'bg-red-500', text:'text-red-500'}} />
+                                    <StatCard title="Viewers Blocked" value="285,400" change="+5%" icon="eye-off" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
+                                    <StatCard title="Takedowns Today" value="5" change="+2%" icon="gavel" color={{bg:'bg-blue-400', text:'text-blue-400'}} />
+                                    <StatCard title="Protected Assets" value="8" change="0%" icon="lock" color={{bg:'bg-blue-600', text:'text-blue-600'}} />
+                                    <StatCard title="Revenue Recovered" value="$4.82M" change="+18%" icon="dollar-sign" color={{bg:'bg-blue-500', text:'text-blue-500'}} />
+                                    <StatCard title="Avg Response" value="47s" change="-1s" icon="clock" color={{bg:'bg-yellow-500', text:'text-yellow-500'}} />
                                 </div>
+
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                     <div className="lg:col-span-2 bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
                                         <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">24h Piracy Traffic</h4>
@@ -135,170 +138,115 @@
                                     <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
                                         <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">High-Risk Upcoming</h4>
                                         <div className="space-y-2">
-                                            {['Man Utd vs Liv', 'Real vs Barca', 'Lakers vs Celtics'].map(match => (
-                                                <div key={match} className="p-2 bg-slate-900/50 rounded border border-slate-800 flex justify-between items-center">
+                                            {['Manchester United vs Liverpool', 'Real Madrid vs Barcelona', 'Lakers vs Celtics'].map(match => (
+                                                <div key={match} className="p-2.5 bg-[#050510] rounded-lg border border-slate-800 flex justify-between items-center hover:border-blue-500/50 transition cursor-default">
                                                     <span className="text-[10px] text-white font-medium">{match}</span>
-                                                    <span className="text-red-500 text-[8px] font-bold">CRITICAL</span>
+                                                    <span className="text-red-500 text-[8px] font-bold px-1.5 py-0.5 bg-red-500/10 rounded">CRITICAL</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
+
                                 <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-4">
                                     <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Regional Distribution</h4>
-                                    <div className="h-40"><canvas id="regionChart"></canvas></div>
+                                    <div className="h-44"><canvas id="regionChart"></canvas></div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Condition 2: Scanner Page */}
+                        {/* VIEW 2: SCANNER (MATCHING SCREENSHOT RESULTS) */}
                         {view === 'Scanner' && (
-                            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-8 max-w-5xl mx-auto">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-blue-500 bg-opacity-10 rounded-lg"><i data-lucide="target" className="text-blue-500 w-5 h-5"></i></div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-white">Live Probe</h3>
-                                        <p className="text-[10px] text-slate-500">Paste any stream URL or social link to run piracy fingerprints.</p>
+                            <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500">
+                                {/* Probe Pipeline Section */}
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Probe Pipeline</h4>
+                                        <div className="flex items-center gap-2 px-2 py-1 bg-blue-500/5 rounded border border-blue-500/10">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                            <span className="text-[9px] text-blue-400 font-mono font-bold">Analysis Engine Active</span>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                                        {[
+                                            { label: 'Resolving target endpoint', detail: 'Endpoint resolved • 3 hops', icon: 'shield-check' },
+                                            { label: 'Probing media stream signature', detail: 'H.264 1080p • 60fps • 6 Mbps', icon: 'radio' },
+                                            { label: 'Comparing against fingerprint vault', detail: 'Match: UEFA Champions League Final 2026', icon: 'fingerprint' },
+                                            { label: 'Geo-tagging viewer cluster', detail: 'Cluster: South Asia • 47.2K concurrent', icon: 'map-pin' },
+                                            { label: 'Computing risk score', detail: 'Confidence 0.94', icon: 'cpu' }
+                                        ].map((step, i) => (
+                                            <div key={i} className="flex items-start gap-4">
+                                                <i data-lucide={step.icon} className="w-4 h-4 text-blue-500 mt-1"></i>
+                                                <div>
+                                                    <p className="text-[11px] font-bold text-slate-200 tracking-tight">{step.label}</p>
+                                                    <p className="text-[10px] text-slate-500 font-medium">{step.detail}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                                <div className="flex gap-2 mb-6">
-                                    <input type="text" placeholder="e.g. https://stream.example.com/live" className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-300 focus:outline-none focus:border-blue-500" />
-                                    <button onClick={() => {setIsScanning(true); setTimeout(()=>setIsScanning(false), 3000)}} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2">
-                                        <i data-lucide="zap" className="w-4 h-4"></i> Run Scan
-                                    </button>
-                                </div>
-                                {isScanning && (
-                                    <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg text-blue-400 flex items-center gap-3 animate-pulse">
-                                        <i data-lucide="loader" className="animate-spin w-4 h-4"></i>
-                                        <span className="font-mono text-[10px]">AI Network Scanner Active... Comparing frames...</span>
+
+                                {/* Scan Report Section */}
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 relative overflow-hidden">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <i data-lucide="alert-triangle" className="w-4 h-4 text-orange-500"></i>
+                                            <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Scan Report</h4>
+                                        </div>
+                                        <span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-500/20 uppercase tracking-wider">
+                                            Suspicious
+                                        </span>
                                     </div>
-                                )}
+                                    
+                                    <div className="bg-[#050510] border border-slate-800/50 p-3 rounded-lg mb-8">
+                                        <p className="text-[9px] text-slate-400 truncate font-mono">
+                                            https://www.bing.com/ck/a?!&&p=94ea34657af5cbcd4e10e6874deb631dcfc7bcf29ff4a7abf31afbceb9b2dceJmltdHM9MTc3MzNlODAwMA&ptn=3&ver=2&hsh=4&fclid=05d11e1d-2634-6a7b-1e2a-0b3d27566b84&psq=youtube&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vY2hhbm5lbC9idHViZSs5U25jb2VpZ2p3
+                                        </p>
+                                    </div>
+
+                                    <div className="mb-8">
+                                        <div className="flex justify-between text-[10px] mb-2 font-bold uppercase tracking-tight">
+                                            <span className="text-slate-400">Risk Score Analysis</span>
+                                            <span className="text-blue-400">95/100</span>
+                                        </div>
+                                        <div className="w-full bg-slate-800/50 h-2 rounded-full overflow-hidden border border-slate-700">
+                                            <div className="bg-gradient-to-r from-blue-600 to-blue-400 h-full w-[95%] shadow-[0_0_15px_rgba(59,130,246,0.4)]"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                        {[
+                                            { label: 'Fingerprint', val: '0x0023C2E7', mono: true },
+                                            { label: 'Region', val: 'South Asia' },
+                                            { label: 'Est. Viewers', val: '78,085', bold: true },
+                                            { label: 'Protocol', val: 'DASH', mono: true }
+                                        ].map(item => (
+                                            <div key={item.label} className="p-3 bg-slate-900/40 border border-slate-800/50 rounded-xl">
+                                                <p className="text-[9px] text-slate-500 uppercase font-bold mb-1.5 tracking-widest">{item.label}</p>
+                                                <p className={`text-[11px] text-white ${item.mono ? 'font-mono' : 'font-medium'} ${item.bold ? 'font-bold' : ''}`}>
+                                                    {item.val}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="p-4 bg-blue-600/5 border border-blue-600/20 rounded-xl flex items-center justify-between group hover:border-blue-600/40 transition">
+                                        <div>
+                                            <p className="text-[9px] text-slate-500 uppercase font-bold mb-1 tracking-widest">Matched Protected Asset</p>
+                                            <p className="text-[13px] text-white font-black uppercase tracking-tight">UEFA Champions League Final 2026</p>
+                                        </div>
+                                        <i data-lucide="shield-check" className="w-6 h-6 text-blue-500/30 group-hover:text-blue-500 transition"></i>
+                                    </div>
+                                </div>
                             </div>
-                        )}{view === 'Scanner' && (
-    <div className="max-w-5xl mx-auto space-y-6">
-        {/* Live Probe Input Box */}
-        <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-8">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-blue-500 bg-opacity-10 rounded-lg">
-                    <i data-lucide="target" className="text-blue-500 w-5 h-5"></i>
-                </div>
-                <div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-tight">Live Probe</h3>
-                    <p className="text-[10px] text-slate-500">Paste any stream URL, telegram handle, or social link.</p>
-                </div>
-            </div>
+                        )}
 
-            <div className="flex gap-2 mb-6">
-                <input 
-                    type="text" 
-                    id="probeInput"
-                    placeholder="e.g. https://www.bing.com/..." 
-                    className="flex-1 bg-[#050510] border border-slate-800 rounded-lg px-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-mono"
-                />
-                <button 
-                    onClick={() => {
-                        setIsScanning(true);
-                        // Simulate the pipeline sequence
-                        setTimeout(() => setIsScanning(false), 2000); 
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg flex items-center gap-2 text-[11px]"
-                >
-                    <i data-lucide="scan-eye" className="w-4 h-4"></i> Run Scan
-                </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mr-2">Try:</span>
-                {['t.me/+RedDevilsHD-EPL', 'iptv-cricstream.app/channel/star-sports-1'].map((tag) => (
-                    <button key={tag} className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-md text-[9px] text-slate-400 hover:text-white transition">
-                        {tag}
-                    </button>
-                ))}
-            </div>
-        </div>
-
-        {/* Probe Pipeline (Shows while scanning or after scan) */}
-        {(isScanning || (!isScanning && document.getElementById('probeInput')?.value)) && (
-            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6 space-y-4">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Probe Pipeline</h4>
-                <div className="space-y-4">
-                    {[
-                        { label: 'Resolving target endpoint', detail: 'Endpoint resolved • 3 hops', icon: 'shield-check' },
-                        { label: 'Probing media stream signature', detail: 'H.264 1080p • 60fps • 6 Mbps', icon: 'radio' },
-                        { label: 'Comparing against fingerprint vault', detail: 'Match: UEFA Champions League Final 2026', icon: 'fingerprint' },
-                        { label: 'Geo-tagging viewer cluster', detail: 'Cluster: South Asia • 47.2K concurrent', icon: 'map-pin' },
-                        { label: 'Computing risk score', detail: 'Confidence 0.94', icon: 'cpu' }
-                    ].map((step, i) => (
-                        <div key={i} className={`flex items-start gap-3 ${isScanning ? 'animate-pulse' : ''}`}>
-                            <i data-lucide={step.icon} className="w-4 h-4 text-blue-500 mt-0.5"></i>
-                            <div>
-                                <p className="text-[11px] font-bold text-white">{step.label}</p>
-                                <p className="text-[10px] text-slate-500">{step.detail}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
-
-        {/* Scan Report (Only shows after scan completes) */}
-        {!isScanning && document.getElementById('probeInput')?.value && (
-            <div className="bg-[#0a0a1f] border border-slate-800 rounded-xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                        <i data-lucide="alert-triangle" className="w-4 h-4 text-yellow-500"></i>
-                        <h4 className="text-[11px] font-bold text-white uppercase tracking-widest">Scan Report</h4>
-                    </div>
-                    <span className="bg-orange-500/10 text-orange-500 text-[9px] font-bold px-2 py-0.5 rounded uppercase">Suspicious</span>
-                </div>
-                
-                <p className="text-[9px] text-slate-500 mb-6 truncate font-mono bg-black/30 p-2 rounded border border-slate-800">
-                    {document.getElementById('probeInput').value}
-                </p>
-
-                <div className="mb-6">
-                    <div className="flex justify-between text-[10px] mb-2">
-                        <span className="text-slate-400">Risk Score</span>
-                        <span className="text-white font-bold">95/100</span>
-                    </div>
-                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-blue-600 h-full w-[95%]"></div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-                        <p className="text-[9px] text-slate-500 uppercase mb-1">Fingerprint</p>
-                        <p className="text-[11px] text-white font-mono">0x0023C2E7</p>
-                    </div>
-                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-                        <p className="text-[9px] text-slate-500 uppercase mb-1">Region</p>
-                        <p className="text-[11px] text-white">South Asia</p>
-                    </div>
-                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-                        <p className="text-[9px] text-slate-500 uppercase mb-1">Est. Viewers</p>
-                        <p className="text-[11px] text-white font-bold">78,085</p>
-                    </div>
-                    <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-                        <p className="text-[9px] text-slate-500 uppercase mb-1">Protocol</p>
-                        <p className="text-[11px] text-white">DASH</p>
-                    </div>
-                </div>
-
-                <div className="p-4 bg-blue-600/5 border border-blue-600/20 rounded-lg">
-                    <p className="text-[9px] text-slate-500 uppercase mb-1">Matched Protected Asset</p>
-                    <p className="text-[12px] text-white font-bold uppercase tracking-tight">UEFA Champions League Final 2026</p>
-                </div>
-            </div>
-        )}
-    </div>
-)}
-
-                        {/* Other Pages Placeholder */}
+                        {/* Fallback for unused pages */}
                         {!['Overview', 'Scanner'].includes(view) && (
-                            <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-800 rounded-xl text-slate-600">
-                                <i data-lucide="refresh-cw" className="w-6 h-6 animate-spin mb-2"></i>
-                                <p>Syncing {view} module...</p>
+                            <div className="flex flex-col items-center justify-center h-[60vh] border-2 border-dashed border-slate-800 rounded-2xl text-slate-600">
+                                <i data-lucide="lock" className="w-8 h-8 mb-4 opacity-20"></i>
+                                <p className="font-medium">Module '{view}' is encrypted.</p>
+                                <p className="text-[10px] mt-1">Connect to API Server to unlock.</p>
                             </div>
                         )}
                     </main>
