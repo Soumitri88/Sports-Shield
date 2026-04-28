@@ -13,6 +13,16 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #050510; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        @keyframes scan-line {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(400%); }
+        }
+        .scan-effect { position: relative; overflow: hidden; }
+        .scan-effect::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(59, 130, 246, 0.5); box-shadow: 0 0 15px #3b82f6;
+            animation: scan-line 2s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-[#050510] text-slate-300 text-[13px] selection:bg-blue-500/30 overflow-hidden">
@@ -25,7 +35,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- Shared UI Components ---
         const SidebarItem = ({ id, icon, label, active, onClick }) => (
             <button 
                 onClick={() => onClick(id)}
@@ -40,7 +49,7 @@
 
         const App = () => {
             const [activeTab, setActiveTab] = useState('Overview');
-            const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, result
+            const [scanStatus, setScanStatus] = useState('idle'); 
             const [scanUrl, setScanUrl] = useState('');
             const chartInstances = useRef({});
 
@@ -70,25 +79,12 @@
             const runScan = () => {
                 if (!scanUrl) return;
                 setScanStatus('scanning');
-                setTimeout(() => {
-                    setScanStatus('result');
-                }, 2000);
+                setTimeout(() => setScanStatus('result'), 2500);
             };
-
-            const sidebarMenu = [
-                { id: 'Overview', icon: 'layout-dashboard' },
-                { id: 'Scanner', icon: 'search' },
-                { id: 'Apps', icon: 'layers' },
-                { id: 'Predictions', icon: 'trending-up' },
-                { id: 'Tracking', icon: 'map' },
-                { id: 'Assets', icon: 'lock' },
-                { id: 'Enforcement', icon: 'gavel' },
-                { id: 'Settings', icon: 'settings' }
-            ];
 
             return (
                 <div className="flex h-screen w-full bg-[#050510]">
-                    {/* Sidebar */}
+                    {/* Sidebar - Matching Ascending Order from Screenshots */}
                     <aside className="w-[240px] bg-[#03030b] border-r border-slate-800/60 p-5 flex flex-col shrink-0">
                         <div className="flex items-center gap-3 text-blue-500 mb-10 px-2">
                             <i data-lucide="shield" className="w-7 h-7 fill-blue-500/20"></i>
@@ -97,29 +93,25 @@
 
                         <nav className="flex-1 space-y-1">
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 px-3 mb-3">System Navigation</p>
-                            {sidebarMenu.map(item => (
-                                <SidebarItem 
-                                    key={item.id} 
-                                    id={item.id} 
-                                    icon={item.icon} 
-                                    label={item.id} 
-                                    active={activeTab === item.id} 
-                                    onClick={(id) => { setActiveTab(id); setScanStatus('idle'); }} 
-                                />
-                            ))}
+                            <SidebarItem id="Overview" icon="layout-dashboard" label="Overview" active={activeTab === 'Overview'} onClick={setActiveTab} />
+                            <SidebarItem id="Scanner" icon="search" label="Scanner" active={activeTab === 'Scanner'} onClick={setActiveTab} />
+                            <SidebarItem id="Apps" icon="layers" label="Apps" active={activeTab === 'Apps'} onClick={setActiveTab} />
+                            <SidebarItem id="Predictions" icon="trending-up" label="Predictions" active={activeTab === 'Predictions'} onClick={setActiveTab} />
+                            <SidebarItem id="Tracking" icon="map" label="Tracking" active={activeTab === 'Tracking'} onClick={setActiveTab} />
+                            <SidebarItem id="Assets" icon="lock" label="Assets" active={activeTab === 'Assets'} onClick={setActiveTab} />
+                            <SidebarItem id="Enforcement" icon="gavel" label="Enforcement" active={activeTab === 'Enforcement'} onClick={setActiveTab} />
+                            <SidebarItem id="Settings" icon="settings" label="Settings" active={activeTab === 'Settings'} onClick={setActiveTab} />
                         </nav>
                     </aside>
 
                     {/* Main Workspace */}
                     <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#050510] p-10">
                         
-                        {/* VIEW: OVERVIEW */}
+                        {/* OVERVIEW SECTION */}
                         {activeTab === 'Overview' && (
                             <div className="animate-in fade-in duration-500">
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-extrabold text-white tracking-tight">Operations Overview</h2>
-                                    <p className="text-slate-500 text-sm mt-1">Real-time piracy intelligence and global enforcement metrics.</p>
-                                </div>
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Operations Overview</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Real-time piracy intelligence and global enforcement metrics.</p>
                                 
                                 <div className="grid grid-cols-6 gap-3 mb-8">
                                     {[
@@ -146,37 +138,36 @@
                                         <h4 className="text-xs font-bold text-white mb-6 uppercase tracking-widest">24h Traffic Impact</h4>
                                         <div className="h-[200px]"><canvas id="trafficChart"></canvas></div>
                                     </div>
-                                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl flex flex-col justify-between">
+                                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-2xl flex flex-col justify-between">
                                         <div>
-                                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-6">AI Efficiency</h4>
-                                            <p className="text-4xl font-black text-white">94%</p>
-                                            <p className="text-xs mt-2 opacity-80 leading-relaxed">Optimization level across all monitored digital assets.</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-6">AI Efficiency</p>
+                                            <p className="text-5xl font-black text-white">94%</p>
+                                            <p className="text-xs mt-4 opacity-80 leading-relaxed">Optimization across all digital assets via fingerprinting.</p>
                                         </div>
-                                        <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/20">System Report</button>
+                                        <button className="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20">System Report</button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* VIEW: SCANNER (Fixed and Working) */}
+                        {/* SCANNER SECTION (Integrated and Working) */}
                         {activeTab === 'Scanner' && (
                             <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-extrabold text-white tracking-tight">Stream Scanner</h2>
-                                    <p className="text-slate-500 text-sm mt-1">Direct probe interface for validating suspicious stream URLs.</p>
-                                </div>
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Stream Scanner</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Direct probe interface for validating suspicious stream URLs.</p>
 
-                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-10 mb-6">
-                                    <h3 className="text-xs font-bold text-white uppercase mb-4 flex items-center gap-2">
-                                        <i data-lucide="zap" className="w-3.5 h-3.5 text-blue-500"></i> Active Probe Input
-                                    </h3>
-                                    <div className="flex gap-3">
+                                <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-10 mb-6 relative overflow-hidden">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <i data-lucide="zap" className="w-4 h-4 text-blue-500"></i>
+                                        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Active Probe Input</h3>
+                                    </div>
+                                    <div className="flex gap-3 relative z-10">
                                         <input 
                                             type="text" 
                                             value={scanUrl}
                                             onChange={(e) => setScanUrl(e.target.value)}
-                                            placeholder="Paste URL or Telegram channel handle..." 
-                                            className="flex-1 bg-[#050510] border border-slate-800 rounded-xl px-5 py-4 text-blue-400 font-mono text-sm focus:outline-none focus:border-blue-500"
+                                            placeholder="Paste URL (e.g. t.me/sports-live or youtube.com/watch?v=...)" 
+                                            className="flex-1 bg-[#050510] border border-slate-800 rounded-xl px-5 py-4 text-blue-400 font-mono text-sm focus:outline-none focus:border-blue-500 transition-all"
                                         />
                                         <button 
                                             onClick={runScan}
@@ -190,91 +181,66 @@
                                 </div>
 
                                 {scanStatus === 'scanning' && (
-                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 space-y-6 animate-pulse">
+                                    <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-8 space-y-6 scan-effect">
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Pipeline Execution</p>
                                         {[
-                                            { t: 'Decoding protocol architecture', s: 'Resolving HLS/DASH manifest...' },
-                                            { t: 'Extracting media fingerprints', s: 'Sampling 30fps frames...' },
-                                            { t: 'Asset Vault lookup', s: 'Matching against 8 protected titles...' }
+                                            { t: 'Decoding protocol architecture', s: 'HLS / DASH detected' },
+                                            { t: 'Extracting media fingerprints', s: 'Comparing video frames...' },
+                                            { t: 'Asset Vault lookup', s: 'Checking 8 protected assets...' }
                                         ].map((p, i) => (
                                             <div key={i} className="flex gap-4">
-                                                <div className="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/40 mt-0.5"></div>
-                                                <div><p className="text-[11px] font-bold text-white">{p.t}</p><p className="text-[10px] text-slate-500 mt-0.5">{p.s}</p></div>
+                                                <div className="w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/40 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div></div>
+                                                <div><p className="text-[11px] font-bold text-white">{p.t}</p><p className="text-[10px] text-slate-500">{p.s}</p></div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
                                 {scanStatus === 'result' && (
-                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-8 animate-in slide-in-from-top-4 duration-500">
+                                    <div className="bg-[#0a0a1f] border border-red-500/30 rounded-2xl p-8 animate-in zoom-in-95 duration-500">
                                         <div className="flex justify-between items-center mb-8 pb-8 border-b border-slate-800/50">
                                             <div>
-                                                <h4 className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Target Analysis</h4>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Target Analysis</p>
                                                 <p className="text-[11px] text-blue-400 font-mono">{scanUrl}</p>
                                             </div>
-                                            <span className="bg-red-500/20 text-red-500 text-[9px] font-black px-3 py-1 rounded border border-red-500/30 uppercase tracking-widest">Malicious Match</span>
+                                            <span className="bg-red-500/20 text-red-500 text-[9px] font-black px-3 py-1 rounded border border-red-500/30 uppercase tracking-widest">Confirmed Piracy</span>
                                         </div>
-                                        
                                         <div className="grid grid-cols-4 gap-4 mb-8">
-                                            {[
-                                                { l: 'Piracy Score', v: '96/100', c: 'text-red-500' },
-                                                { l: 'Region', v: 'South Asia', c: 'text-white' },
-                                                { l: 'Concurrents', v: '78,400', c: 'text-white' },
-                                                { l: 'Fingerprint', v: '0x3D2F7A', c: 'text-white font-mono' }
-                                            ].map((r, i) => (
+                                            {[ {l:'Score', v:'96/100', c:'text-red-500'}, {l:'Region', v:'Global', c:'text-white'}, {l:'Impact', v:'Critical', c:'text-white'}, {l:'Hash', v:'0x3D2F7A', c:'text-white font-mono'} ].map((r, i) => (
                                                 <div key={i} className="p-4 bg-[#050510] rounded-xl border border-slate-800/50 text-center">
-                                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">{r.l}</p>
+                                                    <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">{r.l}</p>
                                                     <p className={`text-sm font-black ${r.c}`}>{r.v}</p>
                                                 </div>
                                             ))}
                                         </div>
-
-                                        <div className="p-5 bg-blue-500/5 border border-blue-500/10 rounded-xl flex items-center justify-between">
-                                            <div>
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Linked Asset</p>
-                                                <p className="text-sm font-black text-white">Premier League Matchday 34</p>
-                                            </div>
-                                            <button className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-[10px] rounded-lg uppercase tracking-widest">Initiate Lockdown</button>
-                                        </div>
+                                        <button className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs rounded-xl uppercase tracking-widest shadow-lg transition-all active:scale-95">Send Takedown Notice</button>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* VIEW: APPS */}
+                        {/* APPS SECTION */}
                         {activeTab === 'Apps' && (
                             <div className="animate-in fade-in duration-500">
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-extrabold text-white tracking-tight">Monitored Platforms</h2>
-                                    <p className="text-slate-500 text-sm mt-1">Continuous surveillance of third-party streaming surfaces.</p>
-                                </div>
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Monitored Platforms</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">Continuous surveillance of third-party streaming surfaces.</p>
                                 <div className="grid grid-cols-3 gap-5">
                                     {[
                                         { n: 'Illegal IPTV', t: 'IPTV App', v: '419.4k', s: '17%', icon: 'tv' },
                                         { n: 'TikTok Live', t: 'Social', v: '184.6k', s: '8%', icon: 'video' },
-                                        { n: 'Telegram Channels', t: 'Messaging', v: '79.0k', s: '12%', icon: 'send' },
-                                        { n: 'YouTube Gaming', t: 'Video', v: '57.8k', s: '5%', icon: 'youtube' },
-                                        { n: 'Twitter / X', t: 'Social', v: '22.4k', s: '2%', icon: 'twitter' }
+                                        { n: 'Telegram', t: 'Messaging', v: '79.0k', s: '12%', icon: 'send' }
                                     ].map((app, i) => (
                                         <div key={i} className="bg-[#0a0a1f] border border-slate-800 rounded-2xl p-6 hover:border-blue-500/40 transition-all group">
                                             <div className="flex justify-between items-start mb-6">
                                                 <div className="flex gap-3">
                                                     <div className="p-3 bg-blue-500/5 rounded-xl border border-blue-500/10"><i data-lucide={app.icon} className="w-5 h-5 text-blue-500"></i></div>
-                                                    <div>
-                                                        <h4 className="text-sm font-bold text-white">{app.n}</h4>
-                                                        <span className="text-[9px] font-black text-slate-500 uppercase px-1.5 py-0.5 bg-slate-800/50 rounded">{app.t}</span>
-                                                    </div>
+                                                    <div><h4 className="text-sm font-bold text-white">{app.n}</h4><span className="text-[9px] font-black text-slate-500 uppercase px-1.5 py-0.5 bg-slate-800/50 rounded">{app.t}</span></div>
                                                 </div>
                                                 <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="bg-[#050510] p-3 rounded-xl border border-slate-800/50">
-                                                    <p className="text-[8px] text-slate-500 uppercase font-bold mb-1">Viewers</p>
-                                                    <p className="text-white text-xs font-black">{app.v}</p>
-                                                </div>
-                                                <div className="bg-[#050510] p-3 rounded-xl border border-slate-800/50">
-                                                    <p className="text-[8px] text-slate-500 uppercase font-bold mb-1">Global Share</p>
-                                                    <p className="text-white text-xs font-black">{app.s}</p>
-                                                </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-[#050510] p-3 rounded-xl border border-slate-800/50 text-center"><p className="text-[8px] text-slate-500 uppercase font-bold">Viewers</p><p className="text-white text-xs font-black">{app.v}</p></div>
+                                                <div className="bg-[#050510] p-3 rounded-xl border border-slate-800/50 text-center"><p className="text-[8px] text-slate-500 uppercase font-bold">Global Share</p><p className="text-white text-xs font-black">{app.s}</p></div>
                                             </div>
                                         </div>
                                     ))}
@@ -282,13 +248,11 @@
                             </div>
                         )}
 
-                        {/* VIEW: PREDICTIONS */}
+                        {/* PREDICTIONS SECTION */}
                         {activeTab === 'Predictions' && (
                             <div className="animate-in fade-in duration-500">
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-extrabold text-white tracking-tight">Predictive Intelligence</h2>
-                                    <p className="text-slate-500 text-sm mt-1">AI forecasting for high-risk broadcasting events.</p>
-                                </div>
+                                <h2 className="text-2xl font-extrabold text-white tracking-tight">Predictive Intelligence</h2>
+                                <p className="text-slate-500 text-sm mt-1 mb-8">AI forecasting for high-risk broadcasting events.</p>
                                 <div className="bg-[#0a0a1f] border border-slate-800 rounded-2xl overflow-hidden">
                                     <table className="w-full text-left text-[12px]">
                                         <thead className="bg-[#050510] text-slate-500 uppercase font-bold text-[10px] border-b border-slate-800">
@@ -296,14 +260,14 @@
                                                 <th className="px-6 py-4">Match / Event</th>
                                                 <th className="px-6 py-4">League</th>
                                                 <th className="px-6 py-4">Est. Piracy</th>
-                                                <th className="px-6 py-4 text-right">Risk</th>
+                                                <th className="px-6 py-4 text-right">Risk Level</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-800/50">
                                             {[
                                                 { m: 'Manchester United vs Liverpool', l: 'Premier League', p: '1.2M+', r: 'Critical' },
                                                 { m: 'Real Madrid vs Barcelona', l: 'La Liga', p: '2.1M+', r: 'Critical' },
-                                                { m: 'India vs Pakistan — T20', l: 'ICC', p: '4.5M+', r: 'Critical' }
+                                                { m: 'Lakers vs Celtics', l: 'NBA', p: '640k+', r: 'High' }
                                             ].map((ev, i) => (
                                                 <tr key={i} className="hover:bg-slate-800/20">
                                                     <td className="px-6 py-4 font-bold text-white">{ev.m}</td>
@@ -318,12 +282,12 @@
                             </div>
                         )}
                         
-                        {/* FALLBACK FOR OTHER TABS */}
+                        {/* FALLBACK FOR OTHER SECTIONS */}
                         {!['Overview', 'Scanner', 'Apps', 'Predictions'].includes(activeTab) && (
-                            <div className="flex flex-col items-center justify-center h-[60vh] opacity-30">
-                                <i data-lucide="shield-off" className="w-12 h-12 mb-4"></i>
-                                <h3 className="text-xl font-black uppercase tracking-widest">{activeTab} Interface</h3>
-                                <p className="text-xs">Live data sync in progress...</p>
+                            <div className="flex flex-col items-center justify-center h-[60vh] opacity-20">
+                                <i data-lucide="shield-off" className="w-16 h-16 mb-4"></i>
+                                <h3 className="text-xl font-black uppercase tracking-widest">{activeTab}</h3>
+                                <p className="text-xs">Connecting to secure data pipe...</p>
                             </div>
                         )}
 
